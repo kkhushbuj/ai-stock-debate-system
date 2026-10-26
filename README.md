@@ -10,6 +10,14 @@ Research angle: does adversarial multi-agent debate + independent
 fact-verification produce more reliable, less-hallucinated investment
 reasoning than one AI reasoning alone?
 
+## Screenshots
+
+![Home page: pick two stocks](docs/screenshots/home.png)
+
+![How it works](docs/screenshots/how-it-works.png)
+
+![A finished debate: winner, confidence split and summary](docs/screenshots/debate-result.png)
+
 ## Setup
 
 ```bash
