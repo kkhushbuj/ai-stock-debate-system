@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/cache/*
+!data/cache/.gitkeep
+data/history.json
+
+# Local tooling and big working files (not part of the app)
+.agents/
+.claude/skills/
+skills-lock.json
+docs/redesign/
+backtests/results/

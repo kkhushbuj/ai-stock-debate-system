@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * StockDuel design tokens.
+ * Stock A = blue, Stock B = amber, the judge / brand = emerald.
+ * ------------------------------------------------------------------ */
+:root {
+  --bg: #06080b;
+  --bg-2: #0a0d12;
+  --surface: #0f131a;
+  --surface-2: #151b24;
+  --surface-3: #1c2430;
+  --line: #1f2733;
+  --line-strong: #2b3646;
+  --text: #eef1f6;
+  --text-2: #aab3c2;
+  --text-3: #6f7a8c;
+  --accent: #19d98f;
+  --accent-ink: #04281b;
+  --accent-soft: rgba(25, 217, 143, 0.12);
+  --accent-ring: rgba(25, 217, 143, 0.32);
+  --a: #5b9dff;
+  --a-soft: rgba(91, 157, 255, 0.14);
+  --b: #ffa24d;
+  --b-soft: rgba(255, 162, 77, 0.14);
+  --bad: #ff6b7a;
+  --bad-soft: rgba(255, 107, 122, 0.12);
+  --warn: #f5c451;
+  --warn-soft: rgba(245, 196, 81, 0.12);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px -10px rgba(0, 0, 0, 0.55);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-accent: var(--accent);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; overflow-anchor: none; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+  overflow-x: clip;
+}
+::selection { background: var(--accent); color: var(--accent-ink); }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum", "ss01"; }
+
+/* ----- layout ----- */
+.wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+.section { padding: 96px 0; position: relative; }
+@media (max-width: 760px) { .section { padding: 64px 0; } }
+
+/* ----- type ----- */
+.h-display {
+  font-weight: 750; letter-spacing: -0.045em; line-height: 0.98;
+  font-size: clamp(2.8rem, 7.4vw, 6.4rem); text-wrap: balance;
+}
+.hd-1 { font-weight: 720; letter-spacing: -0.04em; line-height: 1.02; font-size: clamp(2.2rem, 4.8vw, 4rem); text-wrap: balance; }
+.hd-2 { font-weight: 700; letter-spacing: -0.03em; line-height: 1.08; font-size: clamp(1.8rem, 3.4vw, 2.8rem); text-wrap: balance; }
+.hd-3 { font-weight: 650; letter-spacing: -0.02em; line-height: 1.2; font-size: 1.25rem; }
+.lede { color: var(--text-2); font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.6; max-width: 56ch; text-wrap: pretty; }
+.muted { color: var(--text-2); }
+.faint { color: var(--text-3); }
+.tag-a { color: var(--a); } .tag-b { color: var(--b); } .tag-g { color: var(--accent); }
+
+/* ----- surfaces ----- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.card-pad { padding: 24px; }
+@media (max-width: 640px) { .card-pad { padding: 18px; } }
+.divider { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* Pointer-follow glow. --mx / --my are PERCENTAGES of the card, so the glow
+   sits in the same relative place on cards of any size. */
+.glow-card { position: relative; overflow: hidden; isolation: isolate; transition: border-color .35s var(--ease), transform .45s var(--ease); }
+.glow-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse 70% 70% at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 70%);
+  transition: opacity .4s var(--ease);
+}
+.glow-card:hover { border-color: var(--accent-ring); }
+.glow-card:hover::before { opacity: 1; }
+
+/* ----- buttons ----- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 26px; border-radius: 14px; border: 1px solid transparent;
+  font-weight: 650; font-size: 1rem; letter-spacing: -0.01em; white-space: nowrap;
+  transition: transform .25s var(--ease), background .2s, border-color .2s, box-shadow .3s var(--ease), opacity .2s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 30px -8px var(--accent-ring); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 14px 44px -6px var(--accent-ring); transform: translateY(-2px); }
+.btn-ghost { background: transparent; border-color: var(--line-strong); color: var(--text); }
+.btn-ghost:hover { background: var(--surface-2); border-color: var(--text-3); }
+.btn-sm { height: 40px; padding: 0 16px; border-radius: 11px; font-size: .92rem; }
+
+/* ----- chips ----- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 8px;
+  font-size: .78rem; font-weight: 600; border: 1px solid var(--line-strong); color: var(--text-2); background: var(--surface-2);
+  white-space: nowrap;
+}
+.chip-ok { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-ring); }
+.chip-bad { color: var(--bad); background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+.chip-warn { color: var(--warn); background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+
+/* ----- ticker tape ----- */
+.marquee { display: flex; width: max-content; animation: marquee 48s linear infinite; will-change: transform; backface-visibility: hidden; }
+.marquee:hover { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ----- skeleton + typing ----- */
+.skel { background: var(--surface-3); border-radius: 8px; animation: skelpulse 1.8s ease-in-out infinite; }
+@keyframes skelpulse { 0%, 100% { opacity: .45 } 50% { opacity: 1 } }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 5px; animation: dot 1.1s infinite ease-in-out; }
+.dots i:nth-child(2) { animation-delay: .15s } .dots i:nth-child(3) { animation-delay: .3s }
+@keyframes dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0) } 40% { opacity: 1; transform: translateY(-4px) } }
+
+/* Words fade in one after another (--i = word index). */
+.w { opacity: 0; display: inline-block; animation: wordin .45s var(--ease) forwards; animation-delay: calc(var(--i) * 22ms); white-space: pre-wrap; }
+@keyframes wordin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ----- misc ----- */
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); position: relative; display: inline-block; }
+.live-dot::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--accent); animation: ping 2.6s ease-in-out infinite; }
+@keyframes ping { 0% { transform: scale(.7); opacity: 0 } 30% { opacity: .7 } 100% { transform: scale(1.9); opacity: 0 } }
+.grid-bg {
+  will-change: transform; transform: translateZ(0); contain: paint;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+  opacity: .5;
+}
+.scroll-x { overflow-x: auto; scrollbar-width: thin; }
+.prose-ai p { margin: 0 0 .8em; } .prose-ai p:last-child { margin-bottom: 0; }
+.prose-ai ul { margin: 0 0 .8em; padding-left: 1.3em; list-style: disc; }
+.prose-ai li::marker { color: var(--accent); } .prose-ai li { margin: .25em 0; }
+.prose-ai strong { color: var(--text); font-weight: 650; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .w { opacity: 1; }
+}
+
+
+.factor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; align-items: stretch; }
+.factor-grid > div > .card { height: 100%; }
+@media (max-width: 1100px) { .factor-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .factor-grid { grid-template-columns: 1fr; } }
+
+.how-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.how-grid > .how-item { display: flex; }
+.how-grid > .how-item > .how-card { display: flex; flex-direction: column; width: 100%; }
+@media (max-width: 1000px) { .how-grid { grid-template-columns: 1fr; } }
+
+/* Lenis blocks scroll-chaining on [data-lenis-prevent] boxes (chat, dropdown). Let the wheel pass on to
+   the page once such a box reaches its end, so the page never feels stuck under the mouse. */
+html.lenis [data-lenis-prevent] { overscroll-behavior: auto; }
+
+/* Stepper dot: soft breathing + a ring that fades in and out. Transform/opacity only, so it runs on the GPU. */
+.step-dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .9rem; position: relative;
+  transition: background .4s, border-color .4s, color .4s; }
+.step-dot-active { animation: dotbreathe 2.6s ease-in-out infinite; }
+@keyframes dotbreathe { 0%, 100% { transform: scale(1.04) } 50% { transform: scale(1.12) } }
+.step-ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: ringfade 2.6s ease-in-out infinite; }
+@keyframes ringfade { 0% { transform: scale(1); opacity: 0 } 35% { opacity: .45 } 100% { transform: scale(1.7); opacity: 0 } }
+
+/* Small preview animations (How it works). Fade/slide and "grow from the left" use transform and opacity only,
+   so they run on the graphics chip. They start when a card gets its data-play attribute. */
+.sc-in { opacity: 0; transform: translateY(14px); }
+[data-play] .sc-in { animation: scin .7s var(--ease) both; animation-delay: var(--d, 0s); }
+@keyframes scin { to { opacity: 1; transform: none; } }
+.sc-bar { transform: scaleX(0); transform-origin: left; }
+[data-play] .sc-bar { animation: scbar .9s var(--ease) both; animation-delay: var(--d, 0s); }
+@keyframes scbar { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .sc-in { opacity: 1; transform: none; }
+  .sc-bar { transform: none; }
+}
+
+/* How it works: each card rises in (staggered), its previews slide, draw and pop. All transform/opacity. */
+.how-item { opacity: 0; transform: translateY(30px); }
+.how-item[data-play] { animation: scin .9s var(--ease) both; animation-delay: var(--d, 0s); }
+.sc-in.sc-left { transform: translateX(-28px); }
+.sc-in.sc-right { transform: translateX(28px); }
+.sc-in.sc-pop { transform: scale(.86); }
+.sc-draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+[data-play] .sc-draw { animation: scdraw 1.4s var(--ease) both; animation-delay: calc(var(--d, 0s) + .2s); }
+@keyframes scdraw { to { stroke-dashoffset: 0; } }
+.how-card { transition: transform .5s var(--ease), border-color .3s, box-shadow .5s var(--ease); }
+.how-card:hover { transform: translateY(-6px); border-color: var(--accent-ring); box-shadow: var(--shadow), 0 18px 50px -18px var(--accent-ring); }
+@media (prefers-reduced-motion: reduce) {
+  .how-item { opacity: 1; transform: none; }
+  .sc-draw { stroke-dashoffset: 0; }
+  .how-card:hover { transform: none; }
+}
