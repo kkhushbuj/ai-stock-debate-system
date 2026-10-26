@@ -10,13 +10,11 @@ Research angle: does adversarial multi-agent debate + independent
 fact-verification produce more reliable, less-hallucinated investment
 reasoning than one AI reasoning alone?
 
-## Screenshots
+## Demo
 
-![Home page: pick two stocks](docs/screenshots/home.png)
+![StockDuel demo: pick two stocks, how it works, a finished debate](docs/demo.gif)
 
-![How it works](docs/screenshots/how-it-works.png)
-
-![A finished debate: winner, confidence split and summary](docs/screenshots/debate-result.png)
+_The clip shows picking two stocks, the How it works section, and a finished NVDA vs AMD debate opened from history. A full live debate takes 1-3 minutes._
 
 ## Setup
 
