@@ -101,8 +101,20 @@ chatbot.py              "Ask about this debate" assistant (answers only from the
 history.py              saves finished debates per visitor session
 ticker_lookup.py        S&P 500 ticker <-> company name lookup
 Dockerfile, start.sh    one container that runs the API and the website (Hugging Face)
+tests/                  fast automated tests (no API keys needed)
 backtests/            3 evaluation scripts (see below)
 data/cache/             cached tool responses (gitignored)
+```
+
+## Tests
+
+Fast automated tests for the parts that need no API keys or internet: scoring
+math, winner and confidence split, claim matching, ticker lookup, cache, history
+privacy, chatbot guard rules and the API endpoints.
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
 ```
 
 ## Backtests
