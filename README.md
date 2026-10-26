@@ -186,4 +186,4 @@ Results are written to `backtests/results/*.json` (gitignored).
 
 ## License
 
-All rights reserved. The code is public to view and evaluate only. See `LICENSE`.
+All rights reserved. You may view, copy and run the code unchanged. Modifying it, redistributing it or selling it is not allowed. See `LICENSE`.
