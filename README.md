@@ -183,3 +183,7 @@ Results are written to `backtests/results/*.json` (gitignored).
   `earnings_guidance`). `schemas.py`'s `FactorId` type runs every factor
   value through a synonym/fuzzy normalizer before strict validation, so
   this doesn't hard-crash the run.
+
+## License
+
+All rights reserved. The code is public to view and evaluate only. See `LICENSE`.
