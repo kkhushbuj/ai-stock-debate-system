@@ -12,7 +12,7 @@ reasoning than one AI reasoning alone?
 
 ## Demo
 
-![StockDuel demo: pick two stocks, how it works, a finished debate](docs/demo.gif)
+https://github.com/user-attachments/assets/3ccf19fd-d38f-4804-984f-dd4b12aa33de
 
 _The clip shows picking two stocks, the How it works section, and a finished NVDA vs AMD debate opened from history. A full live debate takes 1-3 minutes._
 
