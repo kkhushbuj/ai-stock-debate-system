@@ -112,7 +112,6 @@ frontend/               Next.js website: landing, live debate, results, history,
 chatbot.py              "Ask about this debate" assistant (answers only from the debate result)
 history.py              saves finished debates per visitor session
 ticker_lookup.py        S&P 500 ticker <-> company name lookup
-Dockerfile, start.sh    optional one-container setup (API + website); not used by the live deployment and not tested
 tests/                  fast automated tests (no API keys needed)
 backtests/            3 evaluation scripts (see below)
 data/cache/             cached tool responses (gitignored)
