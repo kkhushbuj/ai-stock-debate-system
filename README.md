@@ -61,27 +61,33 @@ ticker) and click **Start the debate**. A full run makes ~15-20 live LLM + data
 calls and can take 1-3 minutes. Unknown tickers are rejected with a friendly
 message before any AI call is made.
 
-## Deployment (Hugging Face Spaces)
+## Live site
 
-The plan is a Hugging Face **Docker Space**. The `Dockerfile` and `start.sh`
-put the Python API and the website in one container. The website listens on
-port 7860 and forwards `/api` calls to the API inside the container.
+https://stockduel-kappa.vercel.app
 
-1. Create a new Space, choose **Docker** as the SDK.
-2. In the Space's `README.md` header (the part between `---` lines) set
-   `sdk: docker` and `app_port: 7860`.
-3. In the Space **Settings > Secrets**, add `OPENAI_API_KEY`, `COHERE_API_KEY`,
-   `MISTRAL_API_KEY`, `TAVILY_API_KEY` and `FRED_API_KEY`. Never put keys in the repo.
-4. Push this code to the Space's git repository.
+A full debate takes 2-4 minutes. The Cohere key used for Debater A is a trial key
+with a monthly call limit, so debates can fail once that limit is used up.
 
-Status: the Docker setup has **not been built or tested yet** (Docker is not
-installed on the dev machine), so expect to fix small things on the first build.
+## Deployment
 
-Note: the cache and debate history are saved as local files in `data/`, and
-free Spaces wipe them on restart.
+The site runs in two parts, both on free plans:
 
-Note: the cache and debate history are saved as local files in `data/`, and
-free hosts usually wipe them on restart.
+- **Website** (`frontend/`): Vercel. Root directory is `frontend`. It needs two
+  environment variables: `API_URL` and `NEXT_PUBLIC_API_URL`, both set to the
+  API's HTTPS address. `NEXT_PUBLIC_API_URL` is baked in at build time, so
+  redeploy after changing it.
+- **API** (`api.py`): an Oracle Cloud Always Free VM (Ubuntu 22.04, 1 GB RAM plus
+  2 GB swap). `uvicorn` runs as a `systemd` service on `127.0.0.1:8010`, and
+  Caddy sits in front of it and gets a free HTTPS certificate for
+  `<ip-with-dashes>.sslip.io`. The Caddy proxy has response buffering turned off so
+  the live debate stream works. Ports 80 and 443 are opened in the VM's network
+  security group and its own firewall.
+
+API keys live only in a `.env` file on the VM (see `.env.example`). They are not
+in this repository and not in Vercel.
+
+Note: the cache and debate history are saved as local files in `data/` on the VM.
+They survive restarts, but not if the VM is deleted.
 
 ## Run a debate from the CLI
 
@@ -106,7 +112,7 @@ frontend/               Next.js website: landing, live debate, results, history,
 chatbot.py              "Ask about this debate" assistant (answers only from the debate result)
 history.py              saves finished debates per visitor session
 ticker_lookup.py        S&P 500 ticker <-> company name lookup
-Dockerfile, start.sh    one container that runs the API and the website (Hugging Face)
+Dockerfile, start.sh    optional one-container setup (API + website); not used by the live deployment and not tested
 tests/                  fast automated tests (no API keys needed)
 backtests/            3 evaluation scripts (see below)
 data/cache/             cached tool responses (gitignored)
