@@ -12,7 +12,7 @@ reasoning than one AI reasoning alone?
 
 ## Demo
 
-https://github.com/user-attachments/assets/3ccf19fd-d38f-4804-984f-dd4b12aa33de
+https://github.com/user-attachments/assets/7cccc154-07c2-486d-83f0-abcdb12bb0e9
 
 _The clip shows picking two stocks, the How it works section, and a finished NVDA vs AMD debate opened from history. A full live debate takes 1-3 minutes._
 
