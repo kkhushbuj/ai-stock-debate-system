@@ -5,8 +5,9 @@ FROM node:22-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Hugging Face runs the container as user 1000
-RUN useradd -m -u 1000 user || true
+# Hugging Face runs the container as user 1000. The Node image already has a user with that id ("node"),
+# so remove it and create our own, with a writable app folder.
+RUN userdel -r node 2>/dev/null || true     && useradd -m -u 1000 user     && mkdir -p /home/user/app && chown -R 1000:1000 /home/user
 USER 1000
 ENV HOME=/home/user PATH=/home/user/venv/bin:$PATH
 WORKDIR /home/user/app
