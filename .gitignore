@@ -9,7 +9,7 @@ data/history.json
 
 # Local tooling and big working files (not part of the app)
 .agents/
-.claude/skills/
+.claude/
 skills-lock.json
 docs/redesign/
 backtests/results/
