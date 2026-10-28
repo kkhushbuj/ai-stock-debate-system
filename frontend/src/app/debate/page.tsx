@@ -5,7 +5,7 @@ export const metadata = { title: "Debate | StockDuel" };
 
 export default function DebatePage() {
   return (
-    <Suspense fallback={<div className="wrap" style={{ paddingTop: 140 }}><div className="skel" style={{ height: 240 }} /></div>}>
+    <Suspense fallback={<div className="lp-wrap" style={{ paddingTop: 140 }}><div className="skel" style={{ height: 240 }} /></div>}>
       <DebateView />
     </Suspense>
   );

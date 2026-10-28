@@ -1,126 +1,101 @@
 "use client";
 
-import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
-import { CATEGORIES, CATEGORY_NOTE, FACTORS } from "@/lib/factors";
-import { IconAlert, IconArrow, IconCheck, IconChevron } from "../Icons";
-import { CountUp, GrowBar, Magnetic, Reveal, TiltCard } from "../motion";
+import gsap from "gsap";
+import { CATEGORIES, FACTORS } from "@/lib/factors";
+import { IconArrow } from "../Icons";
+import { CountUp, Magnetic } from "../motion";
 import { scrollToTop } from "../SmoothScroll";
+import { Words, riseIn, riseWords, useScene } from "./kit";
 
-/* ----------------------- Transparent example ----------------------- */
+/* ----------------------- The 10 factors (names only, no weights) ----------------------- */
 
-export function SampleVerdict() {
+const CATEGORY_CLASS: Record<string, string> = { Fundamental: "fc-fund", "Market Intelligence": "fc-mkt", Macro: "fc-macro", External: "fc-ext" };
+const FACTOR_TILES = CATEGORIES.flatMap((c) => FACTORS.filter((f) => f.category === c));
+
+export function FactorsSection() {
+  const ref = useScene<HTMLElement>((root) => {
+    riseWords(root);
+    riseIn(root.querySelectorAll(".fc-note"), root.querySelector(".fc-top")!, { y: 24 });
+    gsap.fromTo(
+      ".fc-t",
+      { clipPath: "inset(100% 0% 0% 0%)" },
+      { clipPath: "inset(0% 0% 0% 0%)", duration: 1, ease: "power4.inOut", stagger: 0.06, clearProps: "clipPath", scrollTrigger: { trigger: root.querySelector(".fc-grid"), start: "top 85%", once: true } },
+    );
+  });
+
   return (
-    <section className="section" id="example">
-      <div className="wrap" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
-        <Reveal>
-          <div className="tag-g" style={{ fontWeight: 650, marginBottom: 14 }}>Transparent by design</div>
-          <h2 className="hd-1">See exactly why one stock wins</h2>
-          <p className="lede" style={{ marginTop: 20 }}>
-            Every claim gets a status you can hover for its source. The final score uses fixed factor weights, so no AI can pick its own rules mid-debate.
-          </p>
-          <ul style={{ listStyle: "none", padding: 0, margin: "32px 0 0", display: "grid", gap: 16 }}>
-            {[
-              "Verified, unverified and disputed claims are labelled on every argument.",
-              "Wrong numbers are shown next to the real ones from the data.",
-              "A factor-by-factor table shows where each stock is stronger.",
-            ].map((t, i) => (
-              <Reveal as="li" key={t} delay={0.1 + i * 0.1}>
-                <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  <span style={{ width: 26, height: 26, flex: "none", borderRadius: 8, display: "grid", placeItems: "center", background: "var(--accent-soft)", color: "var(--accent)" }}><IconCheck size={15} /></span>
-                  <span className="muted">{t}</span>
-                </div>
-              </Reveal>
-            ))}
-          </ul>
-        </Reveal>
-
-        <Reveal delay={0.15}>
-          <TiltCard className="card-pad" max={4}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
-              <span className="tag-g" style={{ fontWeight: 650, fontSize: ".9rem" }}>Example result</span>
-              <span className="chip">From a real run: NVDA vs GOOGL</span>
-            </div>
-            {[{ t: "NVDA", s: 9.44, side: "a" }, { t: "GOOGL", s: 8.38, side: "b" }].map((r) => (
-              <div key={r.t} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "14px 0", borderBottom: "1px solid var(--line)" }}>
-                <span style={{ fontWeight: 700, color: `var(--${r.side})`, fontSize: "1.1rem" }}>{r.t}</span>
-                <span style={{ fontSize: "1.9rem", fontWeight: 720, letterSpacing: "-0.03em" }}>
-                  <CountUp value={r.s} decimals={2} /> <span className="faint" style={{ fontSize: "1rem", fontWeight: 500 }}>/ 10</span>
-                </span>
-              </div>
-            ))}
-            <div style={{ marginTop: 22 }}>
-              <div style={{ display: "flex", height: 34, borderRadius: 999, overflow: "hidden", fontSize: ".82rem", fontWeight: 650 }}>
-                <motion.div initial={{ width: "50%" }} whileInView={{ width: "53%" }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} style={{ background: "var(--a)", color: "#04101f", display: "flex", alignItems: "center", paddingLeft: 14 }}>NVDA 53.0%</motion.div>
-                <div style={{ flex: 1, background: "var(--b)", color: "#2a1500", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 14 }}>GOOGL 47.0%</div>
-              </div>
-              <div className="faint" style={{ display: "flex", justifyContent: "space-between", fontSize: ".78rem", marginTop: 8 }}><span>Confidence split</span><span>50% = dead even</span></div>
-            </div>
-            <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-              {[
-                { f: "Market cap", t: "GOOGL has an elite market capitalization of $4.17 trillion.", n: "Source: valuation data. Matches the fetched data." },
-                { f: "Beta", t: "NVDA's beta of 2.215 indicates higher volatility than the broader market.", n: "Source: valuation data. Fresh data confirms 2.215." },
-              ].map((c) => (
-                <div key={c.f} style={{ padding: 14, borderRadius: 14, background: "var(--surface-2)", border: "1px solid var(--line)" }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
-                    <span className="chip chip-ok"><IconCheck size={13} /> Verified</span>
-                    <span className="faint" style={{ fontSize: ".78rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>{c.f}</span>
-                  </div>
-                  <div style={{ fontSize: ".95rem" }}>{c.t}</div>
-                  <div className="faint" style={{ fontSize: ".8rem", marginTop: 6 }}>{c.n}</div>
-                </div>
-              ))}
-            </div>
-          </TiltCard>
-        </Reveal>
+    <section id="factors" ref={ref} className="fc">
+      <div className="lp-wrap fc-top">
+        <h2 className="lp-display lp-head fc-h"><Words text="10 factors, locked first." /></h2>
+        <p className="fc-note">Every factor is fixed before a debate starts, so no AI can pick its own rules mid-debate.</p>
       </div>
+      <ul className="fc-grid" aria-label="The 10 scoring factors">
+        {FACTOR_TILES.map((f) => (
+          <li key={f.id} className={`fc-t ${CATEGORY_CLASS[f.category]}`}>
+            <span className="fc-name">{f.name}</span>
+            <span className="fc-cat">{f.category}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-/* ----------------------- 10 factors ----------------------- */
+/* ----------------------- Transparent example ----------------------- */
 
-export function FactorsSection() {
+export function SampleVerdict() {
+  const ref = useScene<HTMLElement>((root) => {
+    riseWords(root);
+    riseIn(root.querySelectorAll(".vd-lede > *"), root.querySelector(".vd-head")!, { y: 24, stagger: 0.12 });
+    gsap.fromTo(
+      ".vd-s",
+      { clipPath: "inset(0% 0% 100% 0%)" },
+      { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power4.inOut", stagger: 0.15, clearProps: "clipPath", scrollTrigger: { trigger: root.querySelector(".vd-split"), start: "top 80%", once: true } },
+    );
+    gsap.fromTo(".vd-bar", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power4.out", clearProps: "transform", scrollTrigger: { trigger: root.querySelector(".vd-conf"), start: "top 92%", once: true } });
+  });
+
   return (
-    <section className="section" id="factors">
-      <div className="wrap">
-        <Reveal>
-          <div style={{ maxWidth: 720, marginBottom: 56 }}>
-            <div className="tag-g" style={{ fontWeight: 650, marginBottom: 14 }}>The scoring rules</div>
-            <h2 className="hd-1">10 weighted factors, locked in advance</h2>
-            <p className="lede" style={{ marginTop: 18 }}>Every factor and its weight is fixed before a debate starts. The weights add up to 100%.</p>
-          </div>
-        </Reveal>
-
-        <div className="factor-grid">
-          {CATEGORIES.map((cat, ci) => {
-            const items = FACTORS.filter((f) => f.category === cat);
-            const total = items.reduce((s, f) => s + f.weight, 0);
-            return (
-              <Reveal key={cat} delay={ci * 0.08}>
-                <TiltCard className="card-pad" max={3}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <div className="hd-3">{cat}</div>
-                    <div className="num tag-g" style={{ fontWeight: 700 }}>{total}%</div>
-                  </div>
-                  <p className="faint" style={{ margin: "6px 0 22px", fontSize: ".9rem" }}>{CATEGORY_NOTE[cat]}</p>
-                  <div style={{ display: "grid", gap: 18 }}>
-                    {items.map((f, i) => (
-                      <div key={f.id}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: ".92rem", marginBottom: 8 }}>
-                          <span>{f.name}</span>
-                          <b className="num">{f.weight}%</b>
-                        </div>
-                        <GrowBar pct={(f.weight / 15) * 100} color="var(--accent)" delay={0.15 + i * 0.08} />
-                      </div>
-                    ))}
-                  </div>
-                </TiltCard>
-              </Reveal>
-            );
-          })}
+    <section id="example" ref={ref}>
+      <div className="vd-head lp-paper">
+        <h2 className="lp-display lp-head vd-h"><Words text="See exactly why one stock wins" /></h2>
+        <div className="vd-lede">
+          <p>Every claim gets a status you can hover for its source. The final score follows fixed rules, so no AI can pick its own rules mid-debate.</p>
+          <ul>
+            <li>Verified, unverified and disputed claims are labelled on every argument.</li>
+            <li>Wrong numbers are shown next to the real ones from the data.</li>
+            <li>A factor-by-factor table shows where each stock is stronger.</li>
+          </ul>
         </div>
+      </div>
+
+      <div className="vd-split">
+        <div className="vd-s vd-a">
+          <div className="vd-t">NVDA <span>NVIDIA · from a real run</span></div>
+          <div className="vd-n"><CountUp value={9.44} decimals={2} /><small>/ 10</small></div>
+          <div className="vd-claim">
+            <b>Verified</b>
+            <span>NVDA&apos;s beta of 2.215 indicates higher volatility than the broader market.</span>
+            <small>Source: valuation data. Fresh data confirms 2.215.</small>
+          </div>
+        </div>
+        <div className="vd-s vd-b">
+          <div className="vd-t">GOOGL <span>Alphabet · from a real run</span></div>
+          <div className="vd-n"><CountUp value={8.38} decimals={2} /><small>/ 10</small></div>
+          <div className="vd-claim">
+            <b>Verified</b>
+            <span>GOOGL has an elite market capitalization of $4.17 trillion.</span>
+            <small>Source: valuation data. Matches the fetched data.</small>
+          </div>
+        </div>
+      </div>
+
+      <div className="vd-conf lp-ink">
+        <div className="vd-bar" role="img" aria-label="Confidence split: NVDA 53 percent, GOOGL 47 percent">
+          <div className="vd-bar-a">NVDA 53.0%</div>
+          <div className="vd-bar-b">GOOGL 47.0%</div>
+        </div>
+        <p>Confidence split. 50% would be dead even.</p>
       </div>
     </section>
   );
@@ -137,76 +112,53 @@ const FAQ = [
 ];
 
 export function Faq() {
-  const [open, setOpen] = useState<number | null>(0);
+  const ref = useScene<HTMLElement>((root) => {
+    riseWords(root);
+    riseIn(root.querySelectorAll(".fq-t"), root.querySelector(".fq-list")!, { y: 28, stagger: 0.08, start: "top 85%" });
+  });
+
   return (
-    <section className="section" id="faq">
-      <div className="wrap" style={{ maxWidth: 880 }}>
-        <Reveal>
-          <div className="tag-g" style={{ fontWeight: 650, marginBottom: 14 }}>Questions</div>
-          <h2 className="hd-1" style={{ marginBottom: 40 }}>Good to know before you start</h2>
-        </Reveal>
-        <div style={{ display: "grid", gap: 10 }}>
-          {FAQ.map((f, i) => {
-            const on = open === i;
-            return (
-              <Reveal key={f.q} delay={i * 0.05}>
-                <div className="card" style={{ overflow: "hidden", borderColor: on ? "var(--line-strong)" : undefined }}>
-                  <button
-                    aria-expanded={on}
-                    onClick={() => setOpen(on ? null : i)}
-                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "20px 24px", background: "none", border: 0, textAlign: "left", fontWeight: 650, fontSize: "1.05rem" }}
-                  >
-                    {f.q}
-                    <motion.span animate={{ rotate: on ? 180 : 0 }} style={{ display: "grid", color: "var(--text-3)" }}><IconChevron size={20} /></motion.span>
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {on && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} style={{ overflow: "hidden" }}>
-                        <p className="muted" style={{ margin: 0, padding: "0 24px 22px" }}>{f.a}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+    <section id="faq" ref={ref} className="fq">
+      <h2 className="lp-display lp-head fq-h"><Words text="Good to know" /></h2>
+      <div className="fq-list">
+        {FAQ.map((f, i) => (
+          <details key={f.q} className="fq-t" open={i === 0 ? true : undefined} {...({ name: "faq" } as object)}>
+            <summary>
+              {f.q}
+              <span className="fq-plus" aria-hidden="true" />
+            </summary>
+            <p className="fq-a">{f.a}</p>
+          </details>
+        ))}
       </div>
     </section>
   );
 }
 
-/* ----------------------- CTA + disclaimer ----------------------- */
+/* ----------------------- Closing field + disclaimer ----------------------- */
 
 export function Cta() {
-  return (
-    <section className="section" style={{ paddingBottom: 60 }}>
-      <div className="wrap">
-        <Reveal>
-          <div className="card" style={{ padding: "clamp(40px, 7vw, 88px) clamp(24px, 5vw, 64px)", textAlign: "center", overflow: "hidden", position: "relative" }}>
-            <div aria-hidden="true" className="grid-bg" style={{ position: "absolute", inset: 0 }} />
-            <div aria-hidden="true" style={{ position: "absolute", left: "50%", top: "100%", width: 900, height: 500, transform: "translate(-50%, -50%)", background: "radial-gradient(ellipse, var(--accent-soft), transparent 65%)" }} />
-            <div style={{ position: "relative" }}>
-              <h2 className="hd-1" style={{ maxWidth: 780, margin: "0 auto" }}>Ready to see two AIs argue it out?</h2>
-              <p className="lede" style={{ margin: "20px auto 36px" }}>It takes about a minute or two. No sign-up needed.</p>
-              <Magnetic>
-                <Link href="/#top" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollToTop(); }}>
-                  Start the debate <IconArrow size={19} />
-                </Link>
-              </Magnetic>
-            </div>
-          </div>
-        </Reveal>
+  const ref = useScene<HTMLElement>((root) => {
+    riseWords(root);
+    riseIn(root.querySelectorAll(".cta-act > *, .cta-note"), root.querySelector(".cta-act")!, { y: 28, stagger: 0.12, start: "top 90%" });
+  });
 
-        <Reveal delay={0.1}>
-          <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginTop: 28, padding: "18px 22px", borderRadius: 16, background: "var(--warn-soft)", border: "1px solid color-mix(in srgb, var(--warn) 30%, transparent)", color: "var(--text-2)", fontSize: ".92rem" }}>
-            <span style={{ color: "var(--warn)", flex: "none", marginTop: 2 }}><IconAlert size={18} /></span>
-            <div>
-              <b style={{ color: "var(--text)" }}>For education only. Not financial advice.</b> StockDuel uses AI models and delayed public market data, and AI can make mistakes. Always do your own research before investing.
-            </div>
-          </div>
-        </Reveal>
+  return (
+    <section ref={ref} className="cta">
+      <div>
+        <h2 className="lp-display lp-head cta-h"><Words text="Ready to see two AIs argue it out?" /></h2>
+        <div className="cta-act">
+          <Magnetic>
+            <button type="button" className="go-btn" onClick={scrollToTop}>
+              Start the debate <IconArrow size={26} />
+            </button>
+          </Magnetic>
+          <p>It takes about a minute or two. No sign-up needed.</p>
+        </div>
       </div>
+      <p className="cta-note">
+        For education only. Not financial advice. StockDuel uses AI models and delayed public market data, and AI can make mistakes. Always do your own research before investing.
+      </p>
     </section>
   );
 }

@@ -52,7 +52,7 @@ export const IconUser = (p: P) => (<Svg {...p}><path d="M19 21v-2a4 4 0 0 0-4-4H
 export function Logo({ size = 30 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="var(--accent)" />
+      <rect width="32" height="32" fill="var(--accent)" />
       <path d="M8 8l16 16M24 8 8 24" stroke="var(--accent-ink)" strokeWidth="3" strokeLinecap="round" />
       <circle cx="8" cy="8" r="2.4" fill="var(--a)" stroke="var(--accent)" strokeWidth="1.2" />
       <circle cx="24" cy="8" r="2.4" fill="var(--b)" stroke="var(--accent)" strokeWidth="1.2" />

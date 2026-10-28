@@ -62,13 +62,13 @@ export function ConfirmDialog({
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
             className="card"
-            style={{ width: "min(480px, 100%)", padding: "28px 28px 24px", boxShadow: "0 30px 80px -20px rgba(0,0,0,.8)" }}
+            style={{ width: "min(520px, 100%)", padding: "32px 28px 26px", boxShadow: "0 30px 80px -20px rgba(0,0,0,.8)", fontFamily: "var(--lp-face)" }}
           >
-            <h2 id="confirm-title" className="hd-3" style={{ margin: 0, fontSize: "1.3rem" }}>{title}</h2>
-            <div className="muted" style={{ marginTop: 12, lineHeight: 1.6 }}>{children}</div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap", marginTop: 26 }}>
+            <h2 id="confirm-title" className="lp-display" style={{ fontSize: "clamp(1.8rem, 5vw, 2.6rem)" }}>{title}</h2>
+            <div className="muted" style={{ marginTop: 14, lineHeight: 1.6, fontSize: "1.0625rem" }}>{children}</div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap", marginTop: 26 }}>
               <button ref={cancelRef} className="btn btn-ghost btn-sm" onClick={onCancel}>{cancelLabel}</button>
-              <button className="btn btn-sm" onClick={onConfirm} style={{ background: "var(--bad)", color: "#1a0509", border: "1px solid transparent" }}>
+              <button className="btn btn-sm" onClick={onConfirm} style={{ background: "var(--bad)", color: "#1a0509" }}>
                 {confirmLabel}
               </button>
             </div>

@@ -32,13 +32,7 @@ export function Sparkline({
   if (!line) return null;
   return (
     <svg className={className} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" role="img" aria-label="Recent price trend" style={{ width: "100%", height }}>
-      <defs>
-        <linearGradient id={`g${id}`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor={color} stopOpacity=".3" />
-          <stop offset="1" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <motion.polygon points={area} fill={`url(#g${id})`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }} />
+      <motion.polygon points={area} fill={color} fillOpacity={0.18} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }} />
       <motion.polyline
         points={line}
         fill="none"
@@ -121,16 +115,7 @@ export function AreaChart({
         role="img"
         aria-label="Price chart"
       >
-        <defs>
-          <linearGradient id={`a${id}`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor={color} stopOpacity=".28" />
-            <stop offset="1" stopColor={color} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {[0.25, 0.5, 0.75].map((g) => (
-          <line key={g} x1={0} x2={w} y1={padT + g * (height - padT - padB)} y2={padT + g * (height - padT - padB)} stroke="var(--line)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-        ))}
-        <polygon points={geo.area} fill={`url(#a${id})`} />
+        <polygon points={geo.area} fill={color} fillOpacity={0.16} />
         <motion.polyline
           points={geo.pts}
           fill="none"
@@ -141,7 +126,7 @@ export function AreaChart({
           vectorEffect="non-scaling-stroke"
           initial={reduce ? false : { pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         />
         {hover !== null && (
           <>

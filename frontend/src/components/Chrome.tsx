@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { motion } from "motion/react";
 import { useDebateSession } from "@/lib/debateStore";
-import { IconAlert, IconCheck, IconGithub, IconHistory, IconHome, Logo } from "./Icons";
+import { IconAlert, IconArrow, IconCheck, IconHistory, IconHome, Logo } from "./Icons";
+import { scrollToTop } from "./SmoothScroll";
 
 export function Nav() {
   const path = usePathname();
@@ -33,11 +34,7 @@ export function Nav() {
   }, []);
 
   const link = (href: string, label: string) => (
-    <Link
-      href={href}
-      style={{ color: "var(--text-2)", fontSize: ".95rem", fontWeight: 550, padding: "8px 12px", borderRadius: 10 }}
-      className="nav-link"
-    >
+    <Link href={href} className="nav-link">
       {label}
     </Link>
   );
@@ -53,18 +50,17 @@ export function Nav() {
         left: 0,
         right: 0,
         zIndex: 50,
-        transition: "background .3s, border-color .3s, backdrop-filter .3s",
-        background: scrolled ? "color-mix(in srgb, var(--bg) 94%, transparent)" : "transparent",
-        borderBottom: `1px solid ${scrolled ? "var(--line)" : "transparent"}`,
+        transition: "background .3s",
+        background: scrolled ? "var(--lp-ink)" : "transparent",
       }}
     >
-      <div className="wrap" style={{ height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 11, fontWeight: 750, fontSize: "1.15rem", letterSpacing: "-0.03em" }} aria-label="StockDuel home">
+      <div className="lp-wrap" style={{ height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+        <Link href="/" className="nav-brand" aria-label="StockDuel home">
           <Logo size={30} />
           StockDuel
         </Link>
 
-        <nav aria-label="Main" style={{ display: "flex", alignItems: "center", gap: 2 }} className="hide-sm">
+        <nav aria-label="Main" style={{ display: "flex", alignItems: "center", gap: 4 }} className="hide-sm">
           {home && (
             <>
               {link("/#how", "How it works")}
@@ -78,7 +74,7 @@ export function Nav() {
           {pill && session && (
             <Link
               href={`/debate?a=${encodeURIComponent(session.a)}&b=${encodeURIComponent(session.b)}`}
-              className="btn btn-sm"
+              className="btn btn-sm nav-btn"
               aria-label={`${pill.label}: ${session.a} vs ${session.b}. Go back to it`}
               style={{
                 background: pill.tone === "bad" ? "var(--bad-soft)" : "var(--accent-soft)",
@@ -92,19 +88,21 @@ export function Nav() {
             </Link>
           )}
           {!home && (
-            <Link href="/" className="btn btn-ghost btn-sm" aria-label="Back to the home page">
+            <Link href="/" className="btn btn-ghost btn-sm nav-btn" aria-label="Back to the home page">
               <IconHome size={17} />
               <span className="hide-xs">Home</span>
             </Link>
           )}
-          <Link href="/history" className="btn btn-ghost btn-sm" aria-label="Debate history">
+          <Link href="/history" className="btn btn-ghost btn-sm nav-btn" aria-label="Debate history">
             <IconHistory size={17} />
             <span className="hide-xs">History</span>
           </Link>
         </div>
       </div>
       <style>{`
-        .nav-link:hover { color: var(--text) !important; background: var(--surface-2); }
+        .nav-brand { display: flex; align-items: center; gap: 11px; font-family: var(--lp-face); font-weight: 900; font-size: 1.25rem; letter-spacing: -0.05em; text-transform: uppercase; color: #fff; }
+        .nav-link { color: #fff; font-family: var(--lp-face); font-size: 1rem; font-weight: 700; padding: 8px 12px; opacity: .8; transition: opacity .2s, background .2s; }
+        .nav-link:hover { opacity: 1; background: var(--lp-ink-3); }
         @media (max-width: 760px) { .hide-sm { display: none !important; } }
         @media (max-width: 480px) { .hide-xs { display: none; } }
       `}</style>
@@ -113,28 +111,45 @@ export function Nav() {
 }
 
 export function Footer() {
+  const path = usePathname();
+  // On the home page the start link glides up to the pickers; elsewhere it is a normal link home.
+  const start = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (path === "/") {
+      e.preventDefault();
+      scrollToTop();
+    }
+  };
+
   return (
-    <footer style={{ borderTop: "1px solid var(--line)", marginTop: 40 }}>
-      <div className="wrap" style={{ padding: "44px 24px", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Logo size={26} />
-          <div>
-            <div style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>StockDuel</div>
-            <div className="faint" style={{ fontSize: ".85rem" }}>Built by Khushbu Kapade</div>
-          </div>
+    <footer className="ft">
+      <div className="ft-r1">
+        <div className="ft-t ft-1">
+          <p className="ft-lead">Two AI<span style={{ textTransform: "none" }}>s</span> argue. One judge checks. Built to learn from, not to trade on.</p>
+          <p className="ft-small">For education only. Not financial advice.</p>
         </div>
-        <a
-          href="https://github.com/kkhushbuj/ai-stock-debate-system"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-ghost btn-sm"
-          aria-label="GitHub repository"
-        >
-          <IconGithub size={17} /> GitHub
+        <nav className="ft-t ft-2" aria-label="Footer">
+          <Link href="/#how">How it works</Link>
+          <Link href="/#factors">Factors</Link>
+          <Link href="/#faq">FAQ</Link>
+          <Link href="/history">History</Link>
+        </nav>
+        <div className="ft-t ft-3">
+          <p className="ft-small">Built by</p>
+          <p style={{ fontWeight: 900, fontSize: "1.25rem", lineHeight: 1.1 }}>Khushbu Kapade</p>
+        </div>
+        <a className="ft-t ft-4" href="https://github.com/kkhushbuj/ai-stock-debate-system" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+          <span>GitHub ↗</span>
+          <span className="ft-small">Powered by LangGraph and LangChain.</span>
         </a>
-        <div className="faint" style={{ fontSize: ".85rem", maxWidth: 360 }}>
-          Powered by LangGraph and LangChain. For education only, not financial advice.
+      </div>
+      <div className="ft-r2">
+        <div className="ft-t ft-mark">
+          <span className="lp-display">StockDuel</span>
         </div>
+        <Link href="/#top" className="ft-t ft-go" onClick={start}>
+          <span>Start a duel</span>
+          <IconArrow size={64} strokeWidth={3.5} />
+        </Link>
       </div>
     </footer>
   );

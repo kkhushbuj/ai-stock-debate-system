@@ -2,31 +2,47 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Live, getSession, markSeen, retryDebate, sameDebate, startDebate, useDebateSession } from "@/lib/debateStore";
 import { consumeDebateStart } from "@/lib/nav";
 import { IconAlert, IconArrow, IconCheck, IconCopy } from "../Icons";
 import { Magnetic } from "../motion";
 import { ArgumentCard, SkeletonCard, StockCard } from "./Cards";
-import { ChatPanel, FactorTable, PriceCharts, Tabs, VerdictCard, shareText } from "./Results";
+import { ChatPanel, FactorTable, PriceCharts, Tabs, VerdictCard, prefetchPrices, shareText } from "./Results";
 import { Stepper } from "./Stepper";
 
-function VsBadge() {
+/** Two doors, blue and amber, part once when a debate starts: the same opening as the home page. */
+function Intro() {
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setGone(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
+  if (gone) return null;
   return (
-    <div className="vs-badge" aria-hidden="true" style={{ alignSelf: "center" }}>
-      <div style={{ width: 52, height: 52, borderRadius: "50%", display: "grid", placeItems: "center", fontWeight: 800, fontSize: ".85rem", background: "var(--surface-3)", border: "1px solid var(--line-strong)", color: "var(--text-2)" }}>VS</div>
+    <div className="dv-intro" aria-hidden="true">
+      <motion.div className="dv-a" initial={{ x: 0 }} animate={{ x: "-100%" }} transition={{ duration: 0.9, delay: 0.25, ease: [0.76, 0, 0.24, 1] }} />
+      <motion.div className="dv-b" initial={{ x: 0 }} animate={{ x: "100%" }} transition={{ duration: 0.9, delay: 0.25, ease: [0.76, 0, 0.24, 1] }} />
     </div>
   );
 }
 
-function Versus({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
+/** Two columns side by side. `fields` makes them the full-width blue and amber bar with a VS diamond. */
+function Versus({ left, right, fields = false }: { left: React.ReactNode; right: React.ReactNode; fields?: boolean }) {
+  if (fields) {
+    return (
+      <div className="dv-vs">
+        <div>{left}</div>
+        <div>{right}</div>
+        <div className="ar-vs" aria-hidden="true"><div className="ar-vs-b"><span>VS</span></div></div>
+      </div>
+    );
+  }
   return (
-    <div className="versus" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 18, alignItems: "stretch" }}>
+    <div className="dv-rounds">
       <div>{left}</div>
-      <VsBadge />
       <div>{right}</div>
-      <style>{`@media (max-width: 860px) { .versus { grid-template-columns: 1fr !important; } .versus .vs-badge { justify-self: center; margin: -6px 0; } }`}</style>
     </div>
   );
 }
@@ -50,6 +66,7 @@ function CopyButton({ text }: { text: string }) {
 export function DebateView() {
   const params = useSearchParams();
   const router = useRouter();
+  const reduce = useReducedMotion();
   const a = (params.get("a") || "").trim();
   const b = (params.get("b") || "").trim();
   const session = useDebateSession();
@@ -59,10 +76,12 @@ export function DebateView() {
   //  - a visitor coming back to a debate that is still running or finished in this tab (re-attaches to it).
   // A refresh, the back button after closing the tab, or a pasted link has neither, so it goes home.
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [fresh, setFresh] = useState(false);
   useEffect(() => {
     if (!a || !b) { setAllowed(true); return; }
     if (consumeDebateStart()) {
       startDebate(a, b);
+      setFresh(true);
       setAllowed(true);
     } else if (sameDebate(getSession(), a, b)) {
       markSeen();
@@ -81,6 +100,14 @@ export function DebateView() {
   const done = !!live.result;
   const failed = !!live.error;
 
+  // As soon as the result is in, fetch all the price ranges quietly, so the Price charts tab opens ready.
+  const resultId = live.result?.id;
+  useEffect(() => {
+    const x = live.result;
+    if (x) prefetchPrices(x.ticker_A, x.ticker_B);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultId]);
+
   // Real tickers come back from the server; until then use what is in the URL.
   const tA = live.result?.ticker_A ?? a.toUpperCase();
   const tB = live.result?.ticker_B ?? b.toUpperCase();
@@ -88,15 +115,19 @@ export function DebateView() {
   const nameB = live.result?.name_B ?? tB;
 
   if (allowed !== true) {
-    return <div className="wrap" style={{ paddingTop: 160, minHeight: "60vh" }} aria-busy="true" />;
+    return <div className="dv" style={{ minHeight: "100vh" }} aria-busy="true" />;
   }
 
   if (!a || !b) {
     return (
-      <div className="wrap" style={{ paddingTop: 160, textAlign: "center" }}>
-        <h1 className="hd-2">Pick two stocks to begin</h1>
-        <p className="lede" style={{ margin: "14px auto 28px" }}>Choose the two companies you want to compare.</p>
-        <Link href="/" className="btn btn-primary">Choose stocks <IconArrow size={18} /></Link>
+      <div className="dv">
+        <section className="dv-top" style={{ minHeight: "80vh" }}>
+          <h1 className="lp-display dv-h1" style={{ fontSize: "clamp(2.4rem, 8vw, 8rem)" }}>Pick two stocks to begin.</h1>
+          <p className="dv-sub">Choose the two companies you want to compare.</p>
+          <Link href="/" className="go-btn" style={{ marginTop: 32, display: "inline-flex", background: "var(--lp-green)", color: "var(--lp-ink)" }}>
+            Choose stocks <IconArrow size={26} />
+          </Link>
+        </section>
       </div>
     );
   }
@@ -105,66 +136,58 @@ export function DebateView() {
   const doingA = (n: number) => (n === 1 ? "Writing the opening case..." : "Writing the rebuttal...");
 
   return (
-    <div className="wrap" style={{ paddingTop: 110, paddingBottom: 40 }}>
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-        <h1 className="hd-1" style={{ margin: 0 }}>
-          <span className="tag-a">{tA}</span> <span className="faint" style={{ fontWeight: 500 }}>vs</span> <span className="tag-b">{tB}</span>
-        </h1>
-        <p className="muted" style={{ margin: "10px 0 0" }}>Two AI analysts argue. A third fact-checks every claim.</p>
-      </motion.div>
+    <div className="dv">
+      {fresh && !reduce && <Intro />}
 
-      <Versus left={<StockCard side="a" ticker={tA} name={nameA} />} right={<StockCard side="b" ticker={tB} name={nameB} />} />
+      <section className="dv-top">
+        <motion.h1 className="lp-display dv-h1" initial={reduce ? false : { opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: fresh ? 0.7 : 0.1, ease: [0.16, 1, 0.3, 1] }}>
+          <span className="tag-a">{tA}</span> <span className="dv-vs-word">vs</span> <span className="tag-b">{tB}</span>
+        </motion.h1>
+        <p className="dv-sub">Two AI analysts argue. A third fact-checks every claim.</p>
+      </section>
 
-      <div style={{ marginTop: 22 }}>
-        {failed ? (
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="card card-pad" role="alert" style={{ borderColor: "color-mix(in srgb, var(--bad) 40%, var(--line))" }}>
-            <div style={{ display: "flex", gap: 14 }}>
-              <span style={{ color: "var(--bad)", marginTop: 2 }}><IconAlert size={22} /></span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: "1.1rem" }}>{live.error!.message}</div>
-                <p className="muted" style={{ margin: "6px 0 0" }}>You can try again in a moment.</p>
-                {live.error!.details && (
-                  <details style={{ marginTop: 12 }}>
-                    <summary className="faint" style={{ cursor: "pointer" }}>Technical details</summary>
-                    <pre style={{ whiteSpace: "pre-wrap", fontSize: ".82rem", color: "var(--text-2)", background: "var(--surface-2)", padding: 14, borderRadius: 12, overflowX: "auto" }}>{live.error!.details}</pre>
-                  </details>
-                )}
-                <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
-                  <button className="btn btn-primary btn-sm" onClick={retryDebate}>Try again</button>
-                  <Link href="/" className="btn btn-ghost btn-sm">Choose other stocks</Link>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ) : (
-          <Stepper current={live.step} note={live.note} startedAt={startedAt} running={!done && !failed} finalElapsed={done ? r!.elapsed : undefined} />
-        )}
-      </div>
+      <Versus fields left={<StockCard side="a" ticker={tA} name={nameA} />} right={<StockCard side="b" ticker={tB} name={nameB} />} />
+
+      {failed ? (
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="dv-fail" role="alert">
+          <span style={{ color: "var(--bad)" }}><IconAlert size={26} /></span>
+          <h2>{live.error!.message}</h2>
+          <p className="muted">You can try again in a moment.</p>
+          {live.error!.details && (
+            <details>
+              <summary className="faint" style={{ cursor: "pointer" }}>Technical details</summary>
+              <pre>{live.error!.details}</pre>
+            </details>
+          )}
+          <div className="dv-acts">
+            <button className="btn btn-primary btn-sm" onClick={retryDebate}>Try again</button>
+            <Link href="/" className="btn btn-ghost btn-sm">Choose other stocks</Link>
+          </div>
+        </motion.div>
+      ) : (
+        <Stepper current={live.step} note={live.note} startedAt={startedAt} running={!done && !failed} finalElapsed={done ? r!.elapsed : undefined} />
+      )}
 
       {!failed && (
-        <div style={{ marginTop: 22, display: "grid", gap: 22 }}>
+        <div className="dv-body">
           {r ? (
             <>
               <VerdictCard r={r} />
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="dv-acts">
                 <CopyButton text={shareText(r)} />
                 <Magnetic strength={0.1}><Link href="/" className="btn btn-primary">Debate another stock <IconArrow size={18} /></Link></Magnetic>
               </motion.div>
 
-              <div style={{ marginTop: 28 }}>
-                <Tabs tabs={["Round 1 · Opening", "Round 2 · Rebuttal", "Factor breakdown", "Price charts"]}>
-                  {[
-                    <Versus key="r1" left={<ArgumentCard side="a" ticker={r.ticker_A} debater="Debater A" roundN={1} subtitle="Opening case" arg={r.rounds.r1_A} />} right={<ArgumentCard side="b" ticker={r.ticker_B} debater="Debater B" roundN={1} subtitle="Opening case" arg={r.rounds.r1_B} />} />,
-                    <Versus key="r2" left={<ArgumentCard side="a" ticker={r.ticker_A} debater="Debater A" roundN={2} subtitle={`Rebuttal of ${r.ticker_B}`} arg={r.rounds.r2_A} />} right={<ArgumentCard side="b" ticker={r.ticker_B} debater="Debater B" roundN={2} subtitle={`Rebuttal of ${r.ticker_A}`} arg={r.rounds.r2_B} />} />,
-                    <FactorTable key="f" ta={r.ticker_A} tb={r.ticker_B} rows={r.factors.map((f) => ({ ...f, weight: Math.round(f.weight * 100) }))} />,
-                    <PriceCharts key="p" ta={r.ticker_A} tb={r.ticker_B} />,
-                  ]}
-                </Tabs>
-              </div>
+              <Tabs tabs={["Round 1 · Opening", "Round 2 · Rebuttal", "Factor breakdown", "Price charts"]}>
+                {[
+                  <Versus key="r1" left={<ArgumentCard side="a" ticker={r.ticker_A} debater="Debater A" roundN={1} subtitle="Opening case" arg={r.rounds.r1_A} />} right={<ArgumentCard side="b" ticker={r.ticker_B} debater="Debater B" roundN={1} subtitle="Opening case" arg={r.rounds.r1_B} />} />,
+                  <Versus key="r2" left={<ArgumentCard side="a" ticker={r.ticker_A} debater="Debater A" roundN={2} subtitle={`Rebuttal of ${r.ticker_B}`} arg={r.rounds.r2_A} />} right={<ArgumentCard side="b" ticker={r.ticker_B} debater="Debater B" roundN={2} subtitle={`Rebuttal of ${r.ticker_A}`} arg={r.rounds.r2_B} />} />,
+                  <FactorTable key="f" ta={r.ticker_A} tb={r.ticker_B} rows={r.factors.map((f) => ({ ...f, weight: Math.round(f.weight * 100) }))} />,
+                  <PriceCharts key="p" ta={r.ticker_A} tb={r.ticker_B} />,
+                ]}
+              </Tabs>
 
-              <div style={{ marginTop: 28 }}>
-                <ChatPanel debateId={r.id} winner={r.verdict.winner} />
-              </div>
+              <ChatPanel debateId={r.id} winner={r.verdict.winner} />
             </>
           ) : (
             <>
