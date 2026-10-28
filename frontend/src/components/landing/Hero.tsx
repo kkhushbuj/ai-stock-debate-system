@@ -19,10 +19,14 @@ export function Hero() {
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const html = document.documentElement;
 
+    // When the opening doors are on screen the hero is already finished behind them: the doors slide apart
+    // and show a calm, complete page. Building the page up piece by piece while the doors move looked glitchy.
+    const withDoors = html.classList.contains("doors-on");
+
     // The timeline is built now, paused: building it puts every part in its starting pose.
-    let tl!: gsap.core.Timeline;
+    let tl: gsap.core.Timeline | undefined;
     const ctx = gsap.context(() => {
-      tl = gsap
+      if (!withDoors) tl = gsap
         .timeline({ paused: true, defaults: { ease: "power4.out" } })
         .fromTo(".lp-line > span", { yPercent: 110, y: 0 }, { yPercent: 0, y: 0, duration: 1.1, stagger: 0.12 })
         .from(".hero-sub", { y: 24, opacity: 0, duration: 0.9 }, "-=0.7")
@@ -42,29 +46,17 @@ export function Hero() {
     // Every part is in its starting pose, so the parts that waited behind the class can be shown.
     html.classList.add("hero-go");
 
-    // Play when the doors begin to part. With no doors (a later visit) play as soon as the font is in.
-    let started = false;
-    const start = () => {
-      if (started) return;
-      started = true;
-      tl.play();
-    };
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (html.classList.contains("doors-on")) {
-      window.addEventListener("sd:doors-open", start, { once: true });
-      timer = setTimeout(start, 4500);
-    } else {
-      Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 800))]).then(start);
-    }
+    // Behind the doors nothing plays: show the finished hero. With no doors (a later visit) the entrance
+    // plays as soon as the font is in.
+    if (withDoors) html.classList.add("hero-static");
+    else Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 800))]).then(() => tl?.play());
 
     // Fonts change line widths; measure the page again once they are in.
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
 
     return () => {
-      if (timer) clearTimeout(timer);
-      window.removeEventListener("sd:doors-open", start);
       ctx.revert();
-      html.classList.remove("hero-go");
+      html.classList.remove("hero-go", "hero-static");
     };
   }, []);
 

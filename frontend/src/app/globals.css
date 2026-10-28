@@ -43,6 +43,10 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; overflow-anchor: none; }
+/* No page scrollbar. Under the opening doors it showed as a grey stripe beside them, and it also shifted the
+   layout when it appeared. Scrolling with the wheel, keys and touch works as before. */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
 body {
   margin: 0;
   background: var(--bg);

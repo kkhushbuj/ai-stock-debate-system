@@ -144,9 +144,9 @@ export function DebateView() {
       {fresh && !reduce && <Intro />}
 
       <section className="dv-top">
-        <motion.h1 className="lp-display dv-h1" initial={reduce ? false : { opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: fresh ? 0.7 : 0.1, ease: [0.16, 1, 0.3, 1] }}>
+        <h1 className="lp-display dv-h1">
           <span className="tag-a">{tA}</span> <span className="dv-vs-word">vs</span> <span className="tag-b">{tB}</span>
-        </motion.h1>
+        </h1>
         <p className="dv-sub">Two AI analysts argue. A third fact-checks every claim.</p>
       </section>
 

@@ -21,11 +21,9 @@ function StockCardBase({ side, ticker, name }: { side: "a" | "b"; ticker: string
   const up = (quote?.change_pct ?? 0) >= 0;
 
   return (
-    <motion.div
+    // No entrance animation: the page opens behind the doors already finished, so the doors reveal a calm page.
+    <div
       className={`dv-field dv-${side}`}
-      initial={{ clipPath: side === "a" ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)" }}
-      animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-      transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1], delay: 0.1 }}
     >
       <div className="dv-fside">Stock {side.toUpperCase()}</div>
       <div>
@@ -52,7 +50,7 @@ function StockCardBase({ side, ticker, name }: { side: "a" | "b"; ticker: string
           <div className="skel" style={{ height: 56, marginTop: 14, background: "var(--tone)" }} />
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 

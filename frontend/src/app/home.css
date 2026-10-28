@@ -38,6 +38,8 @@
 .lp-line > span { display: block; }
 .js .lp-line > span { transform: translateY(110%); animation: lp-show 0s 6s forwards; }
 @keyframes lp-show { to { transform: none; } }
+/* Under the opening doors the hero is shown finished (no entrance), so the doors reveal a calm page. */
+html.hero-static .lp-line > span { transform: none; animation: none; }
 /* The rest of the hero stays hidden until its starting poses are set (the hero-go class), so nothing flashes
    before the opening. The 7 second animation is a safety net if the script never runs. */
 html.js:not(.hero-go) :is(.hero-sub, .arena, .actbar) { opacity: 0; animation: lp-fade 0s 7s forwards; }
