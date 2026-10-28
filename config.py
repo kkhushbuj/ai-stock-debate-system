@@ -17,6 +17,7 @@ def _require(name: str) -> str:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY", "")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")  # one shared key, used when a vendor has no key of its own
 # Optional separate OpenRouter keys per vendor, so Claude and Llama can be billed and limited apart.
 _OPENROUTER_VENDOR_KEYS = {
@@ -97,6 +98,9 @@ def get_debater_llm(model_name: str, temperature: float = 0.0, max_tokens: int =
         if model_id.startswith("anthropic/"):
             extra["reasoning"] = {"enabled": False}
         return ChatOpenAI(model=model_id, temperature=temperature, max_tokens=max_tokens, api_key=_OPENROUTER_VENDOR_KEYS.get(model_id.split("/")[0]) or OPENROUTER_API_KEY or None, base_url="https://openrouter.ai/api/v1", timeout=LLM_TIMEOUT, max_retries=2, extra_body=extra)
+    if model_name.startswith("gemini"):
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(model=model_name, temperature=temperature, max_output_tokens=max(max_tokens, 4096), google_api_key=GEMINI_API_KEY or None, timeout=LLM_TIMEOUT, max_retries=2)
     if model_name.startswith("command"):
         from langchain_cohere import ChatCohere
         return ChatCohere(model=model_name, temperature=temperature, max_tokens=max_tokens, cohere_api_key=COHERE_API_KEY or None, timeout=LLM_TIMEOUT)
