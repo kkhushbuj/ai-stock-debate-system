@@ -12,9 +12,19 @@ reasoning than one AI reasoning alone?
 
 ## Demo
 
-https://github.com/user-attachments/assets/7cccc154-07c2-486d-83f0-abcdb12bb0e9
+**1. The home page** (full tour, 1080p)
 
-_The clip shows picking two stocks, the How it works section, and a finished NVDA vs AMD debate opened from history. A full live debate takes 1-3 minutes._
+<video src="docs/demo-home-page.mp4" controls muted width="100%"></video>
+
+[Open the home page video](docs/demo-home-page.mp4)
+
+**2. A live debate** (NVDA vs AMD, from picking the stocks to the verdict, 1080p)
+
+<video src="docs/demo-live-debate.mp4" controls muted width="100%"></video>
+
+[Open the live debate video](docs/demo-live-debate.mp4)
+
+_A full live debate takes about 30 seconds._
 
 ## Setup
 
@@ -28,7 +38,8 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 | Key | Used for |
 |---|---|
-| `OPENROUTER_API_KEY` | Debater A (default model: `openrouter/meta-llama/llama-3.3-70b-instruct`, Llama served through OpenRouter; a Claude judge also works as `openrouter/anthropic/claude-haiku-5.5`) |
+| `GEMINI_API_KEY` | Debater A (default model: `gemini-3.5-flash-lite`, Google Gemini; the free tier is enough for testing) |
+| `OPENROUTER_API_KEY` | Optional: any `openrouter/<vendor>/<model>` model, for example `openrouter/meta-llama/llama-3.3-70b-instruct` |
 | `COHERE_API_KEY` | Optional: any `command-*` model |
 | `MISTRAL_API_KEY` | Debater B (default model: `ministral-3b-latest`) |
 | `OPENAI_API_KEY` | Judge + chat assistant (default model: `gpt-4.1-mini`) |
@@ -37,8 +48,8 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 The models can be changed with `DEBATER_A_MODEL`, `DEBATER_B_MODEL` and
 `JUDGE_MODEL` in `.env`. The provider is picked from the model name
-(`gpt-*`, `openrouter/<vendor>/<model>`, `command-*`, `mistral-*` / `ministral-*`). Free or trial keys have
-call limits, so a full debate (about 15-20 calls) can fail once a limit is hit.
+(`gpt-*`, `gemini-*`, `openrouter/<vendor>/<model>`, `command-*`, `mistral-*` / `ministral-*`). Free or trial keys have
+call limits, so a full debate (about 12 calls) can fail once a limit is hit.
 
 ## Run the website (React + Python API)
 
@@ -58,16 +69,16 @@ npm run dev
 ```
 
 Open http://localhost:3000. Pick two stocks (search a company or type any
-ticker) and click **Start the debate**. A full run makes ~15-20 live LLM + data
-calls and can take 1-3 minutes. Unknown tickers are rejected with a friendly
+ticker) and click **Start the debate**. A full run makes about 12 live LLM calls plus
+data calls and takes about 30 seconds. Unknown tickers are rejected with a friendly
 message before any AI call is made.
 
 ## Live site
 
 https://stockduel-kappa.vercel.app
 
-A full debate takes 2-4 minutes. The Cohere key used for Debater A is a trial key
-with a monthly call limit, so debates can fail once that limit is used up.
+A full debate takes about 30 seconds. It uses free or low-cost API keys with call
+limits, so a debate can fail once a limit is used up.
 
 ## Deployment
 
