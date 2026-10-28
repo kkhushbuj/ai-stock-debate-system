@@ -39,8 +39,6 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 | Key | Used for |
 |---|---|
 | `GEMINI_API_KEY` | Debater A (default model: `gemini-3.5-flash-lite`, Google Gemini; the free tier is enough for testing) |
-| `OPENROUTER_API_KEY` | Optional: any `openrouter/<vendor>/<model>` model, for example `openrouter/meta-llama/llama-3.3-70b-instruct` |
-| `COHERE_API_KEY` | Optional: any `command-*` model |
 | `MISTRAL_API_KEY` | Debater B (default model: `ministral-3b-latest`) |
 | `OPENAI_API_KEY` | Judge + chat assistant (default model: `gpt-4.1-mini`) |
 | `TAVILY_API_KEY` | Live news search |
@@ -48,7 +46,7 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 The models can be changed with `DEBATER_A_MODEL`, `DEBATER_B_MODEL` and
 `JUDGE_MODEL` in `.env`. The provider is picked from the model name
-(`gpt-*`, `gemini-*`, `openrouter/<vendor>/<model>`, `command-*`, `mistral-*` / `ministral-*`). Free or trial keys have
+(`gpt-*`, `gemini-*`, `mistral-*` / `ministral-*`). Free or trial keys have
 call limits, so a full debate (about 12 calls) can fail once a limit is hit.
 
 ## Run the website (React + Python API)
