@@ -7,7 +7,7 @@ import { api, fmtPct } from "@/lib/api";
 import type { Quote, TickerOption } from "@/lib/types";
 import { IconArrow, IconSearch, IconTrendDown, IconTrendUp, IconX } from "./Icons";
 import { sameDebate, useDebateSession } from "@/lib/debateStore";
-import { markDebateStart } from "@/lib/nav";
+import { closeDoors, markDebateStart } from "@/lib/nav";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Magnetic } from "./motion";
 
@@ -339,10 +339,18 @@ export function DuelPicker({
   const session = useDebateSession();
   const [confirming, setConfirming] = useState(false);
 
+  const starting = useRef(false);
   const begin = () => {
     setConfirming(false);
-    markDebateStart();
-    router.push(`/debate?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
+    if (starting.current) return;
+    starting.current = true;
+    const url = `/debate?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+    // Close the doors over this page first, then change page: the debate page opens them again.
+    closeDoors().then(() => {
+      markDebateStart();
+      router.push(url);
+      setTimeout(() => { starting.current = false; }, 1500);
+    });
   };
 
   const go = () => {

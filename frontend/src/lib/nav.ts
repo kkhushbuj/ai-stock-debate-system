@@ -14,6 +14,33 @@ export function markDebateStart() {
   }
 }
 
+/** The doors that close over the home page right before the debate page loads. They stay shut across the
+ *  page change, so the visitor never sees a bare cut or an empty page. The debate page takes them over with
+ *  its own doors (releaseDoors) and opens them. */
+let cover: HTMLElement | null = null;
+
+export function closeDoors(): Promise<void> {
+  if (typeof document === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+  releaseDoors();
+  const el = document.createElement("div");
+  el.className = "dv-cover";
+  el.setAttribute("aria-hidden", "true");
+  el.innerHTML = '<div class="dv-a"></div><div class="dv-b"></div>';
+  document.body.appendChild(el);
+  cover = el;
+  const opts: KeyframeAnimationOptions = { duration: 520, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" };
+  const [l, r] = Array.from(el.children) as HTMLElement[];
+  l.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], opts);
+  const done = r.animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], opts).finished;
+  setTimeout(releaseDoors, 8000); // safety net: never leave the screen covered
+  return done.then(() => undefined, () => undefined);
+}
+
+export function releaseDoors() {
+  cover?.remove();
+  cover = null;
+}
+
 export function consumeDebateStart(): boolean {
   // React can run an effect twice in development; answer the same way both times.
   if (consumed && consumed.href === location.href && Date.now() - consumed.at < 1500) return consumed.allowed;

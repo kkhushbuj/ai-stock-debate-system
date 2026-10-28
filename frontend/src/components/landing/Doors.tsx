@@ -28,17 +28,20 @@ export function Doors() {
     const ctx = gsap.context(() => {
       tl = gsap
         .timeline({ paused: true, onComplete: done })
-        // y is set to 0 on purpose: the words start hidden by a CSS offset, and GSAP would otherwise keep that offset.
-        .fromTo(".lp-door > span", { yPercent: 110, y: 0 }, { yPercent: 0, y: 0, duration: 0.7, ease: "power4.out", stagger: 0.08 })
-        .to(".lp-door-l", { xPercent: -100, duration: 0.95, ease: "power4.inOut" }, "+=0.45")
-        .to(".lp-door-r", { xPercent: 100, duration: 0.95, ease: "power4.inOut" }, "<")
-        .call(() => window.dispatchEvent(new Event("sd:doors-open")), [], "<+=0.3");
+        // The words rise on their own in CSS (see .doors-on in home.css); this only parts the doors.
+        .to(".lp-door-l", { xPercent: -100, duration: 0.9, ease: "power4.inOut" })
+        .to(".lp-door-r", { xPercent: 100, duration: 0.9, ease: "power4.inOut" }, "<")
+        .call(() => window.dispatchEvent(new Event("sd:doors-open")), [], "<+=0.25");
     });
 
-    // Wait for the font, but never for more than a moment.
+    // Wait for the font (never more than a moment) and for the words to finish rising and rest a beat,
+    // then part the doors at once. If the page script was slow, the words have long since landed.
     const fontsReady = Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 1500))]);
     fontsReady.then(() => {
-      if (!cancelled) tl?.play();
+      const rest = Math.max(0, 1150 - performance.now());
+      setTimeout(() => {
+        if (!cancelled) tl?.play();
+      }, rest);
     });
 
     // Safety net: never leave the page covered.

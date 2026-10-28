@@ -51,6 +51,10 @@ html.js:not(.hero-go) :is(.hero-sub, .arena, .actbar) { opacity: 0; animation: l
 .lp-door { flex: 1; display: flex; align-items: center; overflow: hidden; font-family: var(--lp-face); font-weight: 900; text-transform: uppercase; letter-spacing: -.05em; line-height: .88; font-size: clamp(2.6rem, 14vw, 13rem); }
 .lp-door > span { display: block; }
 .js .lp-door > span { transform: translateY(110%); }
+/* The words rise from the very first frame, in CSS, so nothing waits for the page script to load. */
+.doors-on .lp-door > span { animation: lp-door-rise .8s cubic-bezier(.16, 1, .3, 1) both; }
+.doors-on .lp-door-r > span { animation-delay: .08s; }
+@keyframes lp-door-rise { from { transform: translateY(110%); } to { transform: translateY(0); } }
 .lp-door-l { background: var(--lp-blue); color: #fff; justify-content: flex-end; padding-right: .06em; }
 .lp-door-r { background: var(--lp-amber); color: var(--lp-ink); justify-content: flex-start; padding-left: .06em; }
 

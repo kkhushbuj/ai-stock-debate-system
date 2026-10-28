@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Live, getSession, markSeen, retryDebate, sameDebate, startDebate, useDebateSession } from "@/lib/debateStore";
-import { consumeDebateStart } from "@/lib/nav";
+import { consumeDebateStart, releaseDoors } from "@/lib/nav";
 import { IconAlert, IconArrow, IconCheck, IconCopy } from "../Icons";
 import { Magnetic } from "../motion";
 import { ArgumentCard, SkeletonCard, StockCard } from "./Cards";
@@ -16,6 +16,8 @@ import { Stepper } from "./Stepper";
 function Intro() {
   const [gone, setGone] = useState(false);
   useEffect(() => {
+    // These doors are shut and cover the screen exactly like the ones from the home page, so the home page's doors can go.
+    releaseDoors();
     const t = setTimeout(() => setGone(true), 1400);
     return () => clearTimeout(t);
   }, []);
@@ -78,15 +80,17 @@ export function DebateView() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [fresh, setFresh] = useState(false);
   useEffect(() => {
-    if (!a || !b) { setAllowed(true); return; }
+    if (!a || !b) { releaseDoors(); setAllowed(true); return; }
     if (consumeDebateStart()) {
       startDebate(a, b);
       setFresh(true);
       setAllowed(true);
     } else if (sameDebate(getSession(), a, b)) {
+      releaseDoors();
       markSeen();
       setAllowed(true);
     } else {
+      releaseDoors();
       setAllowed(false);
       router.replace("/");
     }

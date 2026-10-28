@@ -13,6 +13,9 @@
 .dv-intro > div { flex: 1; }
 .dv-intro .dv-a { background: var(--lp-blue); }
 .dv-intro .dv-b { background: var(--lp-amber); }
+/* The same doors, shut over the home page just before the page changes (see closeDoors in lib/nav.ts). */
+.dv-cover { position: fixed; inset: 0; z-index: 700; display: flex; pointer-events: none; }
+.dv-cover > div { flex: 1; will-change: transform; }
 
 /* ----- title ----- */
 .dv-top { padding: clamp(104px, 12vw, 148px) var(--lp-gut) clamp(28px, 4vw, 56px); background: var(--lp-ink); color: #fff; }
