@@ -14,15 +14,15 @@ reasoning than one AI reasoning alone?
 
 **1. The home page** (full tour, 1080p)
 
-<video src="docs/demo-home-page.mp4" controls muted width="100%"></video>
+[![StockDuel home page tour](docs/demo-home-page.gif)](docs/demo-home-page.mp4)
 
-[Open the home page video](docs/demo-home-page.mp4)
+_Click the picture to open the full 1080p video._
 
 **2. A live debate** (NVDA vs AMD, from picking the stocks to the verdict, 1080p)
 
-<video src="docs/demo-live-debate.mp4" controls muted width="100%"></video>
+[![StockDuel live debate](docs/demo-live-debate.gif)](docs/demo-live-debate.mp4)
 
-[Open the live debate video](docs/demo-live-debate.mp4)
+_Click the picture to open the full 1080p video._
 
 _A full live debate takes about 30 seconds._
 
