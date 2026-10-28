@@ -28,7 +28,8 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 | Key | Used for |
 |---|---|
-| `COHERE_API_KEY` | Debater A (default model: `command-a-03-2025`) |
+| `OPENROUTER_API_KEY` | Debater A (default model: `openrouter/meta-llama/llama-3.3-70b-instruct`, Llama served through OpenRouter; a Claude judge also works as `openrouter/anthropic/claude-haiku-5.5`) |
+| `COHERE_API_KEY` | Optional: any `command-*` model |
 | `MISTRAL_API_KEY` | Debater B (default model: `ministral-3b-latest`) |
 | `OPENAI_API_KEY` | Judge + chat assistant (default model: `gpt-4.1-mini`) |
 | `TAVILY_API_KEY` | Live news search |
@@ -36,7 +37,7 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 The models can be changed with `DEBATER_A_MODEL`, `DEBATER_B_MODEL` and
 `JUDGE_MODEL` in `.env`. The provider is picked from the model name
-(`gpt-*`, `command-*`, `mistral-*` / `ministral-*`). Free or trial keys have
+(`gpt-*`, `openrouter/<vendor>/<model>`, `command-*`, `mistral-*` / `ministral-*`). Free or trial keys have
 call limits, so a full debate (about 15-20 calls) can fail once a limit is hit.
 
 ## Run the website (React + Python API)
