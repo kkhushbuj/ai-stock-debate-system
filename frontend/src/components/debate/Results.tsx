@@ -293,25 +293,16 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
   const endRef = useRef<HTMLDivElement>(null);
   const follow = useRef(true);
 
-  // When the reader last scrolled (wheel, touch, keys or dragging the scrollbar). While they are
-  // scrolling, new text is held back, so the page has no other work to do and the scroll stays smooth.
-  // Scrolls that this component starts itself (following the answer) are not counted.
-  const lastScroll = useRef(0);
-  const ownScrollUntil = useRef(0);
+  // Is the chat on screen (or just below / above it)? When the reader has scrolled away to look at the
+  // rest of the page, nobody is watching the typing, so the text just catches up in the background.
+  // The text never pauses while the reader scrolls: it keeps its steady pace as long as the chat is in view.
+  const visible = useRef(true);
   useEffect(() => {
-    const mark = () => { lastScroll.current = performance.now(); };
-    const markScroll = () => { if (performance.now() > ownScrollUntil.current) mark(); };
-    const opts = { passive: true } as const;
-    window.addEventListener("wheel", mark, opts);
-    window.addEventListener("touchmove", mark, opts);
-    window.addEventListener("keydown", mark);
-    window.addEventListener("scroll", markScroll, opts);
-    return () => {
-      window.removeEventListener("wheel", mark);
-      window.removeEventListener("touchmove", mark);
-      window.removeEventListener("keydown", mark);
-      window.removeEventListener("scroll", markScroll);
-    };
+    const el = endRef.current?.parentElement;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { visible.current = e.isIntersecting; }, { rootMargin: "250px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   // Bring the newest line into view, but only if it is below the fold.
@@ -319,7 +310,6 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
     const end = endRef.current;
     if (!end) return;
     if (end.getBoundingClientRect().bottom > window.innerHeight - 120) {
-      ownScrollUntil.current = performance.now() + 1100;
       const lenis = window.__lenis;
       if (lenis) lenis.scrollTo(end, { offset: -(window.innerHeight - 160), duration: 0.8 });
       else end.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -349,9 +339,12 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
     };
   }, [busy]);
 
-  // Answers arrive from the server in bursts. The pacer shows them at a calm, steady reading speed
-  // (a little faster only when a long backlog builds up), so the text flows instead of popping in.
-  const pace = useRef<{ buf: string; shown: number; last: number; timer: ReturnType<typeof setInterval> | null }>({ buf: "", shown: 0, last: 0, timer: null });
+  // Answers arrive from the server in bursts. The pacer turns them into one steady flow of words:
+  //  - the speed follows the backlog smoothly (never below a calm reading speed, and the bigger the backlog
+  //    the faster it eases through it), so there are no sudden jumps when a burst lands;
+  //  - only whole words are shown while the answer is still arriving, so lines never re-wrap mid-word;
+  //  - the speed follows real time, so a busy or slow tab does not stall the text.
+  const pace = useRef<{ buf: string; shown: number; last: number; drew: number; drawn: string; timer: ReturnType<typeof setInterval> | null }>({ buf: "", shown: 0, last: 0, drew: 0, drawn: "", timer: null });
   useEffect(() => () => { if (pace.current.timer) clearInterval(pace.current.timer); }, []);
 
   const startPacer = () => {
@@ -360,30 +353,40 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
     st.buf = "";
     st.shown = 0;
     st.last = performance.now();
+    st.drew = 0;
+    st.drawn = "";
     st.timer = setInterval(() => {
       const now = performance.now();
-      const dt = now - st.last; // real time since the last tick: a browser may slow this timer in a background tab
+      const dt = Math.min(250, now - st.last) / 1000; // seconds since the last tick (capped after a long pause)
       st.last = now;
       const backlog = st.buf.length - st.shown;
       if (backlog <= 0) return;
-      if (document.hidden) {
-        // Nobody is watching the typing: show everything that has arrived, so it is all there on return.
+      const watching = !document.hidden && visible.current;
+      if (!watching) {
+        // Nobody is watching the typing (another tab, or the reader scrolled away): take in everything that has
+        // arrived and redraw only now and then, so it is all there on return and costs the page almost nothing.
         st.shown = st.buf.length;
+        if (now - st.drew < 400) return;
       } else {
-        // The reader is scrolling right now: hold the new text back and show it a moment after they stop.
-        if (now - lastScroll.current < 220) return;
-        // ~60 characters a second for most of the answer, easing to ~40 at the very end, faster when a long
-        // backlog builds up. The step follows the real time passed, so a slow timer cannot slow the text.
-        const rate = backlog > 400 ? 160 : backlog > 150 ? 100 : backlog > 40 ? 60 : 40;
-        st.shown = Math.min(st.buf.length, st.shown + Math.max(1, Math.round((rate * dt) / 1000)));
+        // 40 characters a second at least, up to 140 when a long backlog builds up, and it eases down smoothly
+        // as the backlog shrinks, so the end of an answer slows gently instead of stopping short.
+        const rate = Math.min(140, Math.max(40, backlog * 0.9));
+        st.shown = Math.min(st.buf.length, st.shown + rate * dt);
       }
-      const shownText = st.buf.slice(0, st.shown);
+      let shownText = st.buf.slice(0, Math.floor(st.shown));
+      if (st.shown < st.buf.length) {
+        const cut = shownText.search(/\s\S*$/); // hold back a word that is not finished yet
+        if (cut > 0) shownText = shownText.slice(0, cut);
+      }
+      if (shownText === st.drawn) return; // nothing new to draw: skip the work
+      st.drawn = shownText;
+      st.drew = now;
       setMsgs((m) => {
         const copy = m.slice();
         copy[copy.length - 1] = { role: "assistant", content: shownText };
         return copy;
       });
-    }, 50);
+    }, 30);
   };
 
   const finishPacer = () =>
@@ -394,6 +397,9 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
           clearInterval(check);
           if (st.timer) clearInterval(st.timer);
           st.timer = null;
+          // The last redraw may have been skipped while nobody was watching: draw the complete answer.
+          const full = st.buf;
+          setMsgs((m) => (m.length && m[m.length - 1].content !== full ? [...m.slice(0, -1), { role: "assistant", content: full }] : m));
           resolve();
         }
       }, 40);
