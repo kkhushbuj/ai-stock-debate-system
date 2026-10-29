@@ -235,8 +235,8 @@ Results are written to `backtests/results/*.json` (gitignored).
   and cached) for every factor of both stocks, and the judge model only does
   the comparison/labeling: claims are sent in batches of 6 so a small model
   does not drop one. If a reply is cut off, the batch is split in half and
-  retried; if the fact-check still breaks, the debate finishes and the page
-  says "Fact-check unavailable". An agentic tool-calling loop would mean one
+  retried; if the fact-check still breaks, the debate still finishes and every
+  claim is left marked as not checked. An agentic tool-calling loop would mean one
   LLM round-trip per claim for zero benefit over calling the right tool
   directly.
 - **`Claim.factor` self-normalizes.** Cheap/small models don't always
