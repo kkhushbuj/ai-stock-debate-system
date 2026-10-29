@@ -35,15 +35,7 @@ Debates use about 12 LLM calls and usually take 30-60 seconds.
 
 ## Demo
 
-**1. The home page** (full tour, 1080p)
-
 [![StockDuel home page tour](docs/demo-home-page.gif)](docs/demo-home-page.mp4)
-
-_Click the picture to open the full 1080p video._
-
-**2. A live debate** (NVDA vs AMD, from picking the stocks to the verdict, 1080p)
-
-[![StockDuel live debate](docs/demo-live-debate.gif)](docs/demo-live-debate.mp4)
 
 _Click the picture to open the full 1080p video._
 
@@ -160,7 +152,7 @@ history.py              saves finished debates per visitor session
 ticker_lookup.py        S&P 500 ticker <-> company name lookup
 tests/                  fast automated tests (no API keys needed)
 backtests/            3 evaluation scripts (see below)
-docs/                   demo videos and preview pictures used in this README
+docs/                   home page demo video and preview picture used in this README
 data/cache/             cached tool responses (gitignored)
 ```
 
