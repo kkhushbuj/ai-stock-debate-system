@@ -275,12 +275,12 @@ export function Tabs({ tabs, children }: { tabs: string[]; children: React.React
 /* ---------------- Chat ---------------- */
 
 /** One chat message. Memoised so that while an answer streams in, only the newest bubble is redrawn. */
-const Bubble = memo(function Bubble({ role, content }: ChatMessage) {
+const Bubble = memo(function Bubble({ role, content, streaming = false }: ChatMessage & { streaming?: boolean }) {
   return (
     <motion.div className="dv-bub" data-role={role} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
       <span className="dv-bubav">{role === "user" ? <IconUser size={17} /> : <IconBot size={17} />}</span>
       <div className="dv-bubtxt">
-        <Rich text={content} />
+        <Rich text={content} fade={streaming} />
       </div>
     </motion.div>
   );
@@ -368,9 +368,9 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
         st.shown = st.buf.length;
         if (now - st.drew < 400) return;
       } else {
-        // 40 characters a second at least, up to 140 when a long backlog builds up, and it eases down smoothly
-        // as the backlog shrinks, so the end of an answer slows gently instead of stopping short.
-        const rate = Math.min(140, Math.max(40, backlog * 0.9));
+        // A medium reading pace: about 70 characters a second while there is plenty of text waiting, easing down to
+        // 35 as the backlog shrinks, so the end of an answer slows gently instead of stopping short.
+        const rate = Math.min(70, Math.max(35, backlog * 0.5));
         st.shown = Math.min(st.buf.length, st.shown + rate * dt);
       }
       let shownText = st.buf.slice(0, Math.floor(st.shown));
@@ -447,7 +447,7 @@ export function ChatPanel({ debateId, initial = [], winner, suggestions }: { deb
         )}
         <AnimatePresence initial={false}>
           {msgs.map((m, i) => (m.role === "assistant" && !m.content) ? null : (
-            <Bubble key={i} role={m.role} content={m.content} />
+            <Bubble key={i} role={m.role} content={m.content} streaming={busy && m.role === "assistant" && i === msgs.length - 1} />
           ))}
           {busy && msgs[msgs.length - 1]?.role === "assistant" && !msgs[msgs.length - 1].content && (
             <motion.div key="typing" className="dv-bub" data-role="assistant" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

@@ -46,7 +46,24 @@ function typed(nodes: ReactNode[], counter: { n: number }): ReactNode[] {
   return out;
 }
 
-export function Rich({ text, typing = false }: { text: string; typing?: boolean }) {
+/** For a reply that is still streaming: every word is its own span, so a newly arrived word fades in softly
+ *  (the spans already on screen keep their place, so only the new words animate). */
+function fadeWords(nodes: ReactNode[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  nodes.forEach((node, k) => {
+    if (typeof node !== "string") {
+      out.push(node);
+      return;
+    }
+    node.split(/(\s+)/).forEach((tok, t) => {
+      if (!tok) return;
+      out.push(/^\s+$/.test(tok) ? tok : <span key={`f${k}-${t}`} className="wf">{tok}</span>);
+    });
+  });
+  return out;
+}
+
+export function Rich({ text, typing = false, fade = false }: { text: string; typing?: boolean; fade?: boolean }) {
   const counter = { n: 0 };
   const blocks = clean(text || "").split(/\n\s*\n/);
   return (
@@ -56,7 +73,7 @@ export function Rich({ text, typing = false }: { text: string; typing?: boolean 
         if (!lines.length) return null;
         const render = (s: string, key: string) => {
           const nodes = inline(s, key);
-          return typing ? typed(nodes, counter) : nodes;
+          return typing ? typed(nodes, counter) : fade ? fadeWords(nodes) : nodes;
         };
         // A line is a bullet if it starts with "-", "*" or "•", even when that mark is all there is so far
         // (the moment a new bullet starts streaming). Lines before the first bullet are normal text; lines

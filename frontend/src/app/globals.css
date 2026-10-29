@@ -115,6 +115,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* Words fade in one after another (--i = word index). */
 .w { opacity: 0; display: inline-block; animation: wordin .45s var(--ease) forwards; animation-delay: calc(var(--i) * 22ms); white-space: pre-wrap; }
+/* A word of a streaming chat reply fades in as it arrives (opacity only, so it costs almost nothing). */
+.wf { animation: wfin .45s ease-out both; }
+@keyframes wfin { from { opacity: 0; } to { opacity: 1; } }
 @keyframes wordin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* ----- misc ----- */
