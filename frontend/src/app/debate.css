@@ -64,7 +64,7 @@
 .dv-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ----- body ----- */
-.dv-body { display: grid; gap: clamp(32px, 4vw, 56px); padding: clamp(24px, 3vw, 40px) var(--lp-gut) clamp(56px, 7vw, 104px); background: var(--lp-ink); color: var(--text); }
+.dv-body { position: relative; display: grid; gap: clamp(32px, 4vw, 56px); padding: clamp(24px, 3vw, 40px) var(--lp-gut) clamp(56px, 7vw, 104px); background: var(--lp-ink); color: var(--text); }
 .dv-rounds { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .dv-rounds > div { display: flex; min-width: 0; }
 @media (max-width: 860px) { .dv-rounds { grid-template-columns: minmax(0, 1fr); } }

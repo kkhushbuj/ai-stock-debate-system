@@ -195,25 +195,27 @@ export function DebateView() {
             </>
           ) : (
             <>
-              <AnimatePresence mode="wait">
+              {/* popLayout: the waiting card is lifted out of the flow and fades away underneath while the finished
+                  card takes its exact place, so the page never collapses and re-opens between the two. */}
+              <AnimatePresence mode="popLayout" initial={false}>
                 {live.r1 ? (
-                  <motion.div key="r1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <motion.div key="r1">
                     <Versus left={<ArgumentCard side="a" ticker={tA} debater="Debater A" roundN={1} subtitle="Opening case" arg={live.r1.A} typing />} right={<ArgumentCard side="b" ticker={tB} debater="Debater B" roundN={1} subtitle="Opening case" arg={live.r1.B} typing />} />
                   </motion.div>
                 ) : (
-                  <motion.div key="s1" exit={{ opacity: 0 }}>
+                  <motion.div key="s1" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
                     <Versus left={<SkeletonCard side="a" ticker={tA} debater="Debater A" roundN={1} doing={doingA(1)} />} right={<SkeletonCard side="b" ticker={tB} debater="Debater B" roundN={1} doing={doingA(1)} />} />
                   </motion.div>
                 )}
               </AnimatePresence>
               {live.r1 && (
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout" initial={false}>
                   {live.r2 ? (
-                    <motion.div key="r2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <motion.div key="r2">
                       <Versus left={<ArgumentCard side="a" ticker={tA} debater="Debater A" roundN={2} subtitle={`Rebuttal of ${tB}`} arg={live.r2.A} typing />} right={<ArgumentCard side="b" ticker={tB} debater="Debater B" roundN={2} subtitle={`Rebuttal of ${tA}`} arg={live.r2.B} typing />} />
                     </motion.div>
                   ) : (
-                    <motion.div key="s2" exit={{ opacity: 0 }}>
+                    <motion.div key="s2" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
                       <Versus left={<SkeletonCard side="a" ticker={tA} debater="Debater A" roundN={2} doing={doingA(2)} />} right={<SkeletonCard side="b" ticker={tB} debater="Debater B" roundN={2} doing={doingA(2)} />} />
                     </motion.div>
                   )}

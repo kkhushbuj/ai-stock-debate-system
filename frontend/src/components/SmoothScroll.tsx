@@ -34,12 +34,16 @@ export function SmoothScroll() {
     // opening) that number goes stale and Lenis stops short of the real bottom, so scrolling feels
     // stuck. Re-measure whenever the height changes. Two safety nets: a ResizeObserver, plus a
     // cheap height check in case the observer misses a change.
+    // Only the page size is re-measured (lenis.dimensions.resize). lenis.resize() would also reset the
+    // scroll's momentum to where the page is right now, which stops a scroll dead: with a chat answer
+    // growing the page many times a second, scrolling then stutters.
+    const measure = () => lenis.dimensions.resize();
     let queued: ReturnType<typeof setTimeout> | null = null;
     const remeasure = () => {
       if (queued) return; // already scheduled: a streaming answer changes the height many times a second
       queued = setTimeout(() => {
         queued = null;
-        lenis.resize();
+        measure();
       }, 150);
     };
     const ro = new ResizeObserver(remeasure);
@@ -50,12 +54,12 @@ export function SmoothScroll() {
       const h = document.documentElement.scrollHeight;
       if (h !== lastHeight) {
         lastHeight = h;
-        lenis.resize(); // direct call: cheap, and does not depend on an animation frame
+        measure(); // direct call: cheap, and does not depend on an animation frame
       }
     }, 300);
 
-    lenis.resize();
-    const settle = setTimeout(() => lenis.resize(), 600);
+    measure();
+    const settle = setTimeout(measure, 600);
 
     return () => {
       clearTimeout(settle);
