@@ -59,7 +59,7 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 | Key | Used for |
 |---|---|
-| `GEMINI_API_KEY` | Debater A (default model: `gemini-3.1-flash-lite`, Google Gemini; has a free tier) |
+| `NVIDIA_API_KEY` | Debater A (default model: `nvidia/nemotron-3.5-bolt-e4b`, NVIDIA Nemotron on build.nvidia.com; has a free tier) |
 | `MISTRAL_API_KEY` | Debater B (default model: `ministral-3b-latest`, Mistral's smallest model) |
 | `OPENAI_API_KEY` | Judge + chat assistant (default model: `gpt-4.1-mini`; paid, about 1-2 cents per debate) |
 | `TAVILY_API_KEY` | Live news search |
@@ -67,8 +67,10 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 The models can be changed with `DEBATER_A_MODEL`, `DEBATER_B_MODEL` and
 `JUDGE_MODEL` in `.env`. The provider is picked from the model name
-(`gpt-*`, `gemini-*`, `mistral-*` / `ministral-*`). Each default is the cheapest
-model of its company. Free or trial keys have call limits, so a debate can fail
+(`gpt-*`, `nvidia/<model>`, `mistral-*` / `ministral-*`). Each default is a small, cheap
+model. Not every NVIDIA model is open to every account (some return 404), and the
+bigger Nemotron models were slow or cut off the answer in testing, so the default is
+`nemotron-3.5-bolt-e4b`. Free or trial keys have call limits, so a debate can fail
 once a limit is hit. A key with no credit left (for example OpenAI) makes every
 debate fail with a "429 / no credits" error shown on the page.
 
@@ -229,8 +231,7 @@ Results are written to `backtests/results/*.json` (gitignored).
   property) on AI messages to handle both cases safely.
 - **Calls are retried.** `config.invoke_structured` retries a structured call
   up to 3 times, and every provider call has a 90 second timeout, so one flaky
-  reply does not kill a whole debate. If Google answers "503 high demand" for a
-  Gemini model, the retry switches at once to the other Gemini flash-lite model.
+  reply does not kill a whole debate.
 - **Judge fact-check re-fetches data with plain Python, not an LLM tool
   loop.** `judge_factcheck_node` calls the data tools directly (in parallel,
   and cached) for every factor of both stocks, and the judge model only does

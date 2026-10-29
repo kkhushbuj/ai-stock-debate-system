@@ -110,7 +110,7 @@ _PRIVATE_BUILD = [
     r"\b(framework|librar(y|ies)|langgraph|langchain|fastapi|next\.?js|nextjs|react|python|tailwind|streamlit|backend|frontend|database|yfinance|tavily)\b",
     # AI models and prompts
     r"\b(which|what)\b.{0,15}\b(ai |llm |language )?models?\b|\bllm\b",
-    r"\b(gpt|openai|cohere|mistral|gemini|claude|ministral)\b",
+    r"\b(gpt|openai|cohere|mistral|gemini|claude|ministral|nvidia|nemotron)\b",
     r"\bprompts?\b",
     r"\b(which|what) (company|provider|vendor)\b|\bwho (made|built|created|trained|provides?|powers?) (the |your |this )?(ai|model|llm|bot)\b",
     # deploying / hosting

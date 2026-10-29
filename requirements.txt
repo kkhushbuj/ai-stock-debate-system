@@ -3,7 +3,6 @@ langchain>=0.3.10
 langchain-core>=0.3.25
 langchain-openai>=0.2.10
 langchain-mistralai>=0.2.4
-langchain-google-genai>=2.0.0
 yfinance>=0.2.48
 tavily-python>=0.5.0
 fredapi>=0.5.2

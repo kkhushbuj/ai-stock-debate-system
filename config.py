@@ -16,11 +16,11 @@ def _require(name: str) -> str:
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 FRED_API_KEY = os.getenv("FRED_API_KEY", "")
 
-DEBATER_A_MODEL = os.getenv("DEBATER_A_MODEL", "gemini-3.1-flash-lite")
+DEBATER_A_MODEL = os.getenv("DEBATER_A_MODEL", "nvidia/nemotron-3.5-bolt-e4b")
 DEBATER_B_MODEL = os.getenv("DEBATER_B_MODEL", "ministral-3b-latest")
 JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gpt-4.1-mini")
 
@@ -32,8 +32,6 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 LLM_TIMEOUT = 90  # seconds per call; a stuck provider fails fast instead of hanging the debate
 
-# Two Gemini models that stand in for each other when one is overloaded (see invoke_structured).
-_GEMINI_FALLBACK = {"gemini-3.1-flash-lite": "gemini-3.5-flash-lite", "gemini-3.5-flash-lite": "gemini-3.1-flash-lite"}
 
 
 def invoke_structured(llm, schema, prompt, attempts: int = 3):
@@ -48,11 +46,6 @@ def invoke_structured(llm, schema, prompt, attempts: int = 3):
         except Exception as e:
             last = e
             logging.getLogger("stockduel").warning("Structured call failed (attempt %d/%d): %s", i + 1, attempts, e)
-            # Google answers "503 high demand" for a model now and then. Switch to the other Gemini model at once
-            # instead of waiting and trying the busy one again.
-            other = _GEMINI_FALLBACK.get(str(getattr(llm, "model", "")).removeprefix("models/"))
-            if other and ("503" in str(e) or "UNAVAILABLE" in str(e)):
-                llm = get_debater_llm(other, temperature=getattr(llm, "temperature", 0.0) or 0.0, max_tokens=getattr(llm, "max_output_tokens", None) or 2048)
     raise last
 
 
@@ -80,13 +73,14 @@ def get_debater_llm(model_name: str, temperature: float = 0.0, max_tokens: int =
     if model_name.startswith("gpt") or model_name.startswith("o1") or model_name.startswith("o3"):
         from langchain_openai import ChatOpenAI
         return ChatOpenAI(model=model_name, temperature=temperature, max_tokens=max_tokens, api_key=OPENAI_API_KEY or None, timeout=LLM_TIMEOUT, max_retries=2)
-    if model_name.startswith("gemini"):
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        return ChatGoogleGenerativeAI(model=model_name, temperature=temperature, max_output_tokens=max(max_tokens, 4096), google_api_key=GEMINI_API_KEY or None, timeout=LLM_TIMEOUT, max_retries=0)
+    if model_name.startswith("nvidia/"):
+        # NVIDIA's hosted models (for example Nemotron) speak the OpenAI protocol. The model id keeps its "nvidia/" part.
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model=model_name, temperature=temperature, max_tokens=max_tokens, api_key=NVIDIA_API_KEY or None, base_url="https://integrate.api.nvidia.com/v1", timeout=LLM_TIMEOUT, max_retries=2)
     if model_name.startswith("mistral") or model_name.startswith("ministral") or model_name.startswith("open-mistral") or model_name.startswith("open-mixtral"):
         from langchain_mistralai import ChatMistralAI
         return ChatMistralAI(model=model_name, temperature=temperature, max_tokens=max_tokens, api_key=MISTRAL_API_KEY or None, timeout=LLM_TIMEOUT, max_retries=2)
-    raise ValueError(f"Unrecognized model name '{model_name}' — expected a gpt-*, gemini-* or mistral-* / ministral-* id.")
+    raise ValueError(f"Unrecognized model name '{model_name}' — expected a gpt-*, nvidia/* or mistral-* / ministral-* id.")
 
 
 def get_judge_llm(temperature: float = 0.0, max_tokens: int = 2048):
