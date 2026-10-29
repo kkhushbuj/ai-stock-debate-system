@@ -59,7 +59,7 @@ Copy `.env.example` to `.env` and fill in your own API keys. Never commit `.env`
 
 | Key | Used for |
 |---|---|
-| `GEMINI_API_KEY` | Debater A (default model: `gemini-3.5-flash-lite`, Google Gemini; has a free tier) |
+| `GEMINI_API_KEY` | Debater A (default model: `gemini-3.1-flash-lite`, Google Gemini; has a free tier) |
 | `MISTRAL_API_KEY` | Debater B (default model: `ministral-3b-latest`, Mistral's smallest model) |
 | `OPENAI_API_KEY` | Judge + chat assistant (default model: `gpt-4.1-mini`; paid, about 1-2 cents per debate) |
 | `TAVILY_API_KEY` | Live news search |
@@ -229,7 +229,8 @@ Results are written to `backtests/results/*.json` (gitignored).
   property) on AI messages to handle both cases safely.
 - **Calls are retried.** `config.invoke_structured` retries a structured call
   up to 3 times, and every provider call has a 90 second timeout, so one flaky
-  reply does not kill a whole debate.
+  reply does not kill a whole debate. If Google answers "503 high demand" for a
+  Gemini model, the retry switches at once to the other Gemini flash-lite model.
 - **Judge fact-check re-fetches data with plain Python, not an LLM tool
   loop.** `judge_factcheck_node` calls the data tools directly (in parallel,
   and cached) for every factor of both stocks, and the judge model only does
