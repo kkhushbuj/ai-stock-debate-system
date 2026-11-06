@@ -15,8 +15,10 @@ runs a node once every predecessor from the prior superstep has finished
 cross-attack rebuttal, and vice versa, without an explicit join node.
 
 judge_score is a single scoring pass that uses ONLY the ground-truth data
-fetched by judge_factcheck — it never reads the debater arguments, so the
-scores cannot be influenced by writing quality or model style.
+fetched by judge_factcheck — scoring never sees the debater arguments, so the
+scores cannot be influenced by writing quality or model style. The fact-check
+step does read the claims, but its results are shown to the user and do not
+change the score.
 """
 
 from langgraph.graph import END, START, StateGraph

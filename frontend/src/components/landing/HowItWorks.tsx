@@ -9,7 +9,7 @@ import { Words, riseIn, riseWords, useScene } from "./kit";
 const FIELDS = [
   { cls: "ho-1", clause: "First, pick two.", text: "Choose any two companies from the S&P 500, or type any ticker you like." },
   { cls: "ho-2", clause: "Then they argue.", text: "Each analyst gets live data, argues for its stock, then attacks the other side's weak points." },
-  { cls: "ho-3", clause: "Then a judge checks.", text: "A separate judge re-fetches the real numbers and marks every claim. It never reads the debate." },
+  { cls: "ho-3", clause: "Then a judge checks.", text: "A separate judge re-fetches the real numbers and marks every claim. Its scores never see the debate text." },
   { cls: "ho-4", clause: "Last, one verdict.", text: "Ten locked factors turn the checked facts into a score for each stock." },
 ];
 

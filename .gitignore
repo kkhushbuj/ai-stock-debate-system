@@ -12,5 +12,4 @@ data/history.json
 .claude/
 skills-lock.json
 docs/redesign/
-backtests/results/
 docs/demo.mp4

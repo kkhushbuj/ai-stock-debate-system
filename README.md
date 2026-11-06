@@ -4,9 +4,12 @@ Two independent LLM debaters (from two different AI companies) argue for
 competing stocks using live-fetched data across two rounds (pro case, then
 cross-attack rebuttal). A third, separate LLM judge (a third company) re-fetches
 fresh data, fact-checks every claim the debaters made, and then scores both
-stocks on 10 weighted factors from that real data alone. It never reads the
-debate text, so it cannot be swayed by who writes better. The winner and the
-confidence split come from plain Python maths, never from a black-box number.
+stocks on 10 weighted factors from that real data alone. Scoring never sees the
+debate text; the fact-check step does read the analysts' claims. So the score
+cannot be swayed by who writes better. The winner and the confidence split come
+from plain Python maths, never from a black-box number.
+
+**Not investment advice.** StockDuel is a learning and research project.
 
 Research angle: does adversarial multi-agent debate + independent
 fact-verification produce more reliable, less-hallucinated investment
@@ -25,9 +28,9 @@ The website shows these five steps while a debate runs:
 3. **Fact-check.** The judge fetches fresh data for all 10 factors of both stocks.
    It checks every claim against it (in batches of 6) and marks it verified,
    unverified or disputed. A disputed claim shows the real number next to the
-   wrong one.
+   wrong one. Fact-check results are shown to the user and don't change the score.
 4. **Scoring.** The judge gives each stock a 0-10 score per factor, using only
-   the real data. It never sees the debate text.
+   the real data. Scoring never sees the debate text.
 5. **Verdict.** The locked factor weights are applied in Python. That gives the
    winner and the confidence split. A short plain-language summary is added.
 
@@ -143,7 +146,7 @@ state.py            LangGraph state schema
 cache.py             TTL-tiered file cache + backtest freeze mode
 tools/               yfinance / Tavily / FRED tools, each cache-wrapped
 agents/debater.py    debater agents (Round 1 pro case, Round 2 attack)
-agents/judge.py      judge: fact-check -> score R1 + R2 -> verdict (fails soft if the fact-check breaks)
+agents/judge.py      judge: fact-check -> one scoring pass -> verdict (fails soft if the fact-check breaks)
 graph.py              LangGraph wiring + CLI entrypoint
 api.py                  FastAPI wrapper used by the website (no engine changes)
 frontend/               Next.js website: landing, live debate, results, history, chat
@@ -194,7 +197,9 @@ python -m backtests.factcheck_accuracy collect --pairs NVDA:AMD MSFT:GOOGL
 python -m backtests.factcheck_accuracy score backtests/results/factcheck_claims_<ts>.json
 ```
 
-Results are written to `backtests/results/*.json` (gitignored).
+Results are written to `backtests/results/*.json`. These files are no longer
+gitignored, so a run you want to keep can be committed and checked by others.
+No result files are committed yet.
 
 ## Design notes
 
@@ -203,11 +208,18 @@ Results are written to `backtests/results/*.json` (gitignored).
   winner are computed in plain Python (`factors.blended_score`,
   `agents/judge.py:final_verdict_node`) — the LLM never outputs the
   probability/verdict number directly.
-- **The judge scores from data, not from the debate.** `judge_score_node`
-  only receives the freshly fetched numbers for both stocks, never the
-  arguments. In an earlier version the judge read the claims, and swapping
-  which model argued which stock flipped the winner in 4 of 5 fair-fight
-  pairs: the score was following writing quality, not fundamentals.
+- **Scoring uses data, not the debate.** `judge_score_node` only receives the
+  freshly fetched numbers for both stocks, never the arguments. The fact-check
+  step does read the analysts' claims, but its results are shown to the user and
+  do not change the score or the winner. In an earlier version the scoring step
+  read the claims, and swapping which model argued which stock flipped the winner
+  in 4 of 5 fair-fight pairs. That was an earlier run: its raw results were
+  not kept, so it cannot be re-checked from this repository, and the current
+  version has not been re-run on the same test.
+- **There is one scoring pass.** `judge_score_node` scores once and stores the
+  same result under both round keys (`round1_scores`, `round2_scores`), so the
+  per-factor average in `final_verdict_node` returns that score unchanged. The
+  two keys are kept so the state, API and tests do not change.
 - **Claims are structured, not prose.** Every debater argument is
   extracted into a `DebaterArgument` (argument text + itemized `Claim`
   list with factor/statement/cited value/source), so the judge's

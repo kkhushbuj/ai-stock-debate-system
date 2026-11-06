@@ -4,9 +4,11 @@ either debater.
 
   1. judge_factcheck_node — independently re-fetches EVERY factor for BOTH
                             tickers and tags every debater claim as verified /
-                            unverified / false.
+                            unverified / false. This step reads the claims.
+                            Its results are shown to the user and do not
+                            change the score.
   2. judge_score_node     — scores both stocks on the 10 weighted factors
-                            using ONLY the ground-truth data. The judge never
+                            using ONLY the ground-truth data. Scoring never
                             sees the debater arguments, so writing quality
                             cannot influence the scores.
   3. final_verdict_node   — deterministic Python aggregation of the per-factor
@@ -202,8 +204,8 @@ def judge_factcheck_node(state: DebateState) -> dict:
             f"- false: the fresh data contradicts the cited value, or it looks fabricated/outdated\n\n"
             f"Every claim listed above must appear exactly once with a verdict. "
             f"CRITICAL: whenever verdict is 'false', you MUST fill in `actual_value` with the "
-            f"correct real number/fact from the data above — this replaces the debater's wrong "
-            f"figure and is what the next scoring stage will use instead. Never leave "
+            f"correct real number/fact from the data above — it is shown to the user next to "
+            f"the debater's wrong figure. Never leave "
             f"`actual_value` blank on a false verdict.\n\n"
             f"KEEP IT COMPACT: `explanation` must be ONE short sentence, max ~15 words, never a "
             f"paragraph — do not restate the claim, just say why it's verified/false/unverified."
@@ -268,8 +270,14 @@ def judge_factcheck_node(state: DebateState) -> dict:
 
 def judge_score_node(state: DebateState) -> dict:
     """Score both stocks purely from ground-truth data. The debater arguments
-    are intentionally NOT included — the judge never sees what the AIs wrote,
-    so the scores cannot be influenced by writing quality or model style."""
+    are intentionally NOT included — scoring never sees what the AIs wrote,
+    so the scores cannot be influenced by writing quality or model style.
+    The fact-check results are not used here either: they are shown to the
+    user and do not change the score.
+
+    This is ONE scoring pass. The same score object is stored under both
+    round keys so the state shape, API and tests stay unchanged, which means
+    the per-factor average in final_verdict_node is a no-op."""
     ticker_A, ticker_B = state["ticker_A"], state["ticker_B"]
     ground_truth_A = state["ground_truth_A"]
     ground_truth_B = state["ground_truth_B"]
@@ -306,8 +314,10 @@ def final_verdict_node(state: DebateState) -> dict:
     r2_A = {fs.factor: fs.score_A for fs in r2.factor_scores}
     r2_B = {fs.factor: fs.score_B for fs in r2.factor_scores}
 
-    # Equal-weight the two rounds per factor, then apply the locked factor
-    # weights deterministically — no LLM ever touches this arithmetic.
+    # round1_scores and round2_scores hold the same single scoring pass (see
+    # judge_score_node), so this average returns that score unchanged. Then the
+    # locked factor weights are applied deterministically — no LLM ever touches
+    # this arithmetic.
     combined_A = {fid: (r1_A.get(fid, 5.0) + r2_A.get(fid, 5.0)) / 2 for fid in FACTOR_IDS}
     combined_B = {fid: (r1_B.get(fid, 5.0) + r2_B.get(fid, 5.0)) / 2 for fid in FACTOR_IDS}
 

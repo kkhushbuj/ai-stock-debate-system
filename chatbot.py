@@ -200,7 +200,7 @@ worked out with fixed rules, not an AI guess.
 
 REAL STRENGTHS (say these when asked why to use it)
 - Every claim is checked against fresh data. A wrong number is shown next to the real one.
-- The judge never reads the debate text, so it cannot be swayed by who writes better.
+- Scoring never sees the debate text, so it cannot be swayed by who writes better. The fact-check step does read the analysts' claims, but its results do not change the score.
 - The scoring rules are fixed before the debate, so nobody changes them mid-way.
 - Two sides must attack each other, which brings out risks a single AI answer can miss.
 - It uses live data, not the AI's old memory.
@@ -227,7 +227,7 @@ then do your own research before any decision.
 STOCKDUEL_EXPLANATION = (
     "StockDuel compares two stocks. Two AI analysts argue for their stock using live market data, "
     "first with an opening case and then by attacking the other side's weak points. Then a separate AI "
-    "judge re-checks every claim against fresh data and scores both stocks. The judge never reads the "
+    "judge re-checks every claim against fresh data and scores both stocks. Scoring never sees the "
     "debate text, so it cannot be swayed by how well the analysts write. You can compare any two "
     "publicly traded companies by picking two tickers and starting the debate. It is for education "
     "only and is not financial advice."
